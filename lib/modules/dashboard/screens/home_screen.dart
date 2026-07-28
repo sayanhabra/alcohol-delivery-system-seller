@@ -1,7 +1,4 @@
-// modules/user/screens/home_screen.dart
-
 import 'package:adm_seller/core/shared/helpers/location_helper.dart';
-import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,12 +22,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Small delay to ensure smooth transition
-    // Future.delayed(const Duration(milliseconds: 300), () {
     if (mounted) {
       _getCurrentLocation();
     }
-    // });
   }
 
   // ============================================================
@@ -109,15 +103,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // OPEN SETTINGS
   // ============================================================
 
-  Future<void> _openSettings() async {
-    await _locationHelper.openAppSettings();
-    // Check again after returning from settings
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        _getCurrentLocation();
-      }
-    });
-  }
+  // Future<void> _openSettings() async {
+  //   await _locationHelper.openAppSettings();
+  //   // Check again after returning from settings
+  //   Future.delayed(const Duration(milliseconds: 500), () {
+  //     if (mounted) {
+  //       _getCurrentLocation();
+  //     }
+  //   });
+  // }
 
   // ============================================================
   // UI

@@ -298,7 +298,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         const SizedBox(height: AppStyle.spaceXXLarge),
         SecondaryButton(
-          text: 'Continue',
+          text: 'Login',
           horizontalMargin: 0,
           height: 56,
           state: _isSendingOtp
@@ -307,6 +307,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ? ButtonState.enabled
               : ButtonState.disabled,
           onPressed: _sendOtp,
+        ),
+        const SizedBox(height: AppStyle.spaceMedium),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "you don't have account?",
+              style: AppStyle.bodyMedium.copyWith(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                context.push('/register');
+              },
+              child: Text(
+                'Sign up',
+                style: AppStyle.label.copyWith(
+                  color: const Color(0xFF1565C0), // Use a link color
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

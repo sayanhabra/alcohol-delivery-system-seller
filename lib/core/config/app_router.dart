@@ -4,6 +4,8 @@ import 'package:adm_seller/core/navigation/main_navigation_shell.dart';
 import 'package:adm_seller/core/navigation/navigation_config.dart';
 import 'package:adm_seller/core/shared/const/keys.dart';
 import 'package:adm_seller/modules/auth/screens/login_screen.dart';
+import 'package:adm_seller/modules/auth/screens/register_screen.dart';
+// import 'package:adm_seller/modules/auth/screens/register_screen.dart';
 import 'package:adm_seller/modules/auth/screens/splash_screen.dart';
 import 'package:adm_seller/modules/dashboard/screens/dashboard_screen.dart';
 import 'package:adm_seller/modules/dashboard/screens/home_screen.dart';
@@ -52,6 +54,7 @@ class AuthState {
 class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String register = '/register';
   static const String dashboard = '/dashboard';
   static const String home = '/home';
 
@@ -112,16 +115,17 @@ final GoRouter appRouter = GoRouter(
 
     final isSplash = state.matchedLocation == AppRoutes.splash;
     final isLogin = state.matchedLocation == AppRoutes.login;
+    final isRegister = state.matchedLocation == AppRoutes.register;
     final isDashboard = state.matchedLocation == AppRoutes.dashboard;
 
     // If not authenticated and trying to access protected routes
-    if (!isAuthenticated && !isSplash && !isLogin) {
+    if (!isAuthenticated && !isSplash && !isLogin && !isRegister) {
       debugPrint('🔀 Redirecting to login (not authenticated)');
       return AppRoutes.login;
     }
 
     // If authenticated and on splash or login, go to dashboard
-    if (isAuthenticated && (isSplash || isLogin)) {
+    if (isAuthenticated && (isSplash || isLogin || isRegister)) {
       debugPrint('🔀 Redirecting to dashboard (authenticated)');
       return AppRoutes.dashboard;
     }
@@ -133,7 +137,7 @@ final GoRouter appRouter = GoRouter(
     }
 
     // If authenticated and trying to access a route not allowed for their type
-    if (isAuthenticated && userType != null) {
+    if (isAuthenticated) {
       final items = NavigationConfig.getItemsForUser(userType);
       final allowedRoutes = items.map((item) => item.route).toList();
       allowedRoutes.add(AppRoutes.profile);
@@ -173,6 +177,19 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         debugPrint('📍 LoginScreen');
         return const LoginScreen();
+      },
+    ),
+
+    // ============================================================
+    // REGISTER ROUTE
+    // ============================================================
+    GoRoute(
+      path: AppRoutes.register,
+      name: 'register',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        debugPrint('📍 RegisterScreen');
+        return const RegisterScreen();
       },
     ),
 

@@ -46,6 +46,7 @@ dependencies:
   firebase_crashlytics:
   firebase_remote_config:
   flutter_svg: ^2.3.0
+  image_picker: ^1.2.3
 
 dependency_overrides:
   path_provider_android: 2.2.19

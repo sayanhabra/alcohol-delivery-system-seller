@@ -5,15 +5,18 @@ class Validator {
       return 'This field cannot be empty !';
     }
     if (!RegExp(
-            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-        .hasMatch(value)) {
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+    ).hasMatch(value)) {
       return 'Please enter a valid email address !';
     }
     return null;
   }
 
-  static String? passwordValidator(String? value,
-      {String? otherPassword, int minLength = 3}) {
+  static String? passwordValidator(
+    String? value, {
+    String? otherPassword,
+    int minLength = 3,
+  }) {
     if (value == null || value.isEmpty) {
       return 'This field cannot be empty !';
     }
@@ -51,7 +54,7 @@ class Validator {
       return 'This field cannot be empty !';
     }
     if (value.length != 10) {
-      return 'Phone number is incorrect';
+      return 'Phone number should be 10 digit';
     }
     return null;
   }
@@ -63,8 +66,11 @@ class Validator {
     return null;
   }
 
-  static String? minLengthValidator(String? value,
-      {String? incorrectMessage, int length = 2}) {
+  static String? minLengthValidator(
+    String? value, {
+    String? incorrectMessage,
+    int length = 2,
+  }) {
     if (value == null || value.isEmpty) {
       return 'This field cannot be empty !';
     }
