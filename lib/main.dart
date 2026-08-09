@@ -17,7 +17,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Optional: Set initial user type for testing
     // ref.read(userTypeProvider.notifier).state = USER_TYPE_USER;
-
+    final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
 
@@ -27,7 +27,7 @@ class MyApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
 
       // GoRouter
-      routerConfig: appRouter, // Use the appRouter from app_router.dart
+      routerConfig: router, // Use the appRouter from app_router.dart
       // BotToast
       builder: (context, child) {
         return BotToastInit()(context, child);

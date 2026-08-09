@@ -1,3 +1,4 @@
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AppStyle {
@@ -144,6 +145,17 @@ class AppStyle {
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: Colors.red,
+  );
+
+  static const buttonPreviousTextStyle = TextStyle(
+    color: ColorName.primarybackground,
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+  );
+  static const buttonNextTextStyle = TextStyle(
+    color: ColorName.white,
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
   );
 
   // ============================================================

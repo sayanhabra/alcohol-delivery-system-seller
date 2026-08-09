@@ -12,11 +12,13 @@ class BottomNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(navigationItemsProvider);
-    final selectedIndex = ref.watch(selectedIndexProvider);
 
-    if (items.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    // Derive selected index from current route — always in sync with URL
+    final location = GoRouterState.of(context).matchedLocation;
+    final selectedIndex = items.indexWhere((item) => item.route == location);
+    final effectiveIndex = selectedIndex == -1 ? 0 : selectedIndex;
+
+    if (items.isEmpty) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
@@ -27,7 +29,7 @@ class BottomNavBar extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, -3),
           ),
@@ -39,7 +41,7 @@ class BottomNavBar extends ConsumerWidget {
           topRight: Radius.circular(20),
         ),
         child: BottomNavigationBar(
-          currentIndex: selectedIndex,
+          currentIndex: effectiveIndex,
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           selectedItemColor: const Color(0xFF98001F),
@@ -52,28 +54,23 @@ class BottomNavBar extends ConsumerWidget {
             fontSize: 11,
             fontWeight: FontWeight.w400,
           ),
-          elevation: 0, // Remove default elevation
+          elevation: 0,
           onTap: (index) {
-            // Update selected index
-            ref.read(selectedIndexProvider.notifier).state = index;
-
-            // Navigate to the selected route
+            if (index == effectiveIndex) return;
             final route = items[index].route;
             context.go(route);
           },
           items: items.map((item) {
-            final isSelected = items.indexOf(item) == selectedIndex;
+            final isSelected = items.indexOf(item) == effectiveIndex;
             return BottomNavigationBarItem(
               icon: SvgNavIcon(
                 assetPath: item.iconPath,
-                color: isSelected
-                    ? const Color(0xFF98001F) // Selected color
-                    : Colors.grey, // Unselected color
+                color: isSelected ? const Color(0xFF98001F) : Colors.grey,
                 size: 24,
               ),
               activeIcon: SvgNavIcon(
                 assetPath: item.activeIconPath,
-                color: const Color(0xFF98001F), // Selected color
+                color: const Color(0xFF98001F),
                 size: 24,
                 isActive: true,
               ),

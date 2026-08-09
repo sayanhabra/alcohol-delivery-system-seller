@@ -1,9 +1,19 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://taskmanage.albatrossoft.com/taskapi';
+  static const String baseUrl = 'https://api.fluup.online/api/v1';
 
-  static const String login = '/memberLogin';
-  static const String memberTaskList = '/memberTaskList';
-  static const String memberDashboard = '/memberDashboard';
-  static const String taskDetailWorkList = '/taskDetailWorkList';
-  static const String addTaskWork = '/addTaskWork';
+  static const String baseUrlSeller = 'https://api.fluup.online/api/v1/seller';
+
+  //==================seller =============================
+  //auth
+  static const String checkPhoneNo = '/auth/check-phone';
+  static const String sendOtp = '/auth/send-otp';
+  static const String varifyOtp = '/auth/verify-otp';
+  static const String authRefresh = '/auth/refresh';
+  static const String logout = '/auth/logout';
+  static const String authStatus = '/auth/status';
+  static const String getProfile = '/auth/profile';
+  static const String updateProfile = '/auth/profile';
+  static const String profileImage = '/auth/profile-image';
+  static const String profileDocs = '/auth/profile/documents';
+  static const String storeStatus = '/auth/stores-status';
 }

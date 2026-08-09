@@ -1,22 +1,18 @@
-import 'package:adm_seller/core/navigation/bottom_nav_bar.dart';
+// core/navigation/main_navigation_shell.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'bottom_nav_bar.dart';
 
-class MainNavigationShell extends ConsumerStatefulWidget {
+class MainNavigationShell extends ConsumerWidget {
   const MainNavigationShell({super.key, required this.navigationShell});
 
   final Widget navigationShell;
 
   @override
-  ConsumerState<MainNavigationShell> createState() =>
-      _MainNavigationShellState();
-}
-
-class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: widget.navigationShell,
+      body: navigationShell,
       bottomNavigationBar: const BottomNavBar(),
     );
   }
