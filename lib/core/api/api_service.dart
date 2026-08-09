@@ -291,6 +291,7 @@
 // api/api_service.dart (Updated)
 
 import 'package:adm_seller/modules/auth/models/check_phone_response.dart';
+import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
 import 'package:adm_seller/modules/auth/models/send_otp_response.dart';
 import 'package:adm_seller/modules/auth/models/verify_otp_request.dart';
 import 'package:adm_seller/modules/auth/models/verify_otp_response.dart';
@@ -400,12 +401,12 @@ class ApiService {
   }
 
   /// PUT /seller/auth/profile
-  Future<BaseResponseModel> updateProfile(Map<String, dynamic> data) async {
+  Future<SellerProfileResponse> updateProfile(Map<String, dynamic> data) async {
     return _handler.put(
       endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.updateProfile}',
       data: data,
       contentType: RequestContentType.json,
-      fromJson: (json) => BaseResponseModel.fromJson(json),
+      fromJson: (json) => SellerProfileResponse.fromJson(json),
       errorMessage: 'Failed to update profile',
     );
   }

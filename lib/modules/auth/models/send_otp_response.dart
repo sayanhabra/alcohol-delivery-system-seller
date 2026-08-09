@@ -19,9 +19,17 @@ class SendOtpResponseData {
     return SendOtpResponseData(
       nextStep: NextStep.fromString(json['nextStep'] as String?),
       challengeToken: json['challengeToken'] as String? ?? '',
-      expiresInSeconds: json['expiresInSeconds'] as int? ?? 300,
-      cooldownSeconds: json['cooldownSeconds'] as int? ?? 60,
+      expiresInSeconds: _toInt(json['expiresInSeconds']) ?? 300,
+      cooldownSeconds: _toInt(json['cooldownSeconds']) ?? 60,
     );
+  }
+
+  static int? _toInt(dynamic val) {
+    if (val == null) return null;
+    if (val is int) return val;
+    if (val is double) return val.toInt();
+    if (val is String) return int.tryParse(val) ?? double.tryParse(val)?.toInt();
+    return null;
   }
 
   Map<String, dynamic> toJson() {

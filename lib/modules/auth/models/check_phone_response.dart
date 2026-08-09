@@ -67,9 +67,17 @@ class CheckPhoneResponse {
       message: json['message'] as String? ?? '',
       nextStep: NextStep.fromString(responseData?['nextStep'] as String?),
       challengeToken: responseData?['challengeToken'] as String?,
-      expiresInSeconds: responseData?['expiresInSeconds'] as int?,
-      cooldownSeconds: responseData?['cooldownSeconds'] as int?,
+      expiresInSeconds: _toInt(responseData?['expiresInSeconds']),
+      cooldownSeconds: _toInt(responseData?['cooldownSeconds']),
     );
+  }
+
+  static int? _toInt(dynamic val) {
+    if (val == null) return null;
+    if (val is int) return val;
+    if (val is double) return val.toInt();
+    if (val is String) return int.tryParse(val) ?? double.tryParse(val)?.toInt();
+    return null;
   }
 
   bool get isSuccess => statusCode == 200;

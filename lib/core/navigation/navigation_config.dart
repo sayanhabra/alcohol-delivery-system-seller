@@ -5,7 +5,7 @@ import 'package:adm_seller/core/config/app_router.dart';
 // import 'package:adm_seller/features/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/dashboard/screens/dashboard_screen.dart';
-import 'package:adm_seller/modules/dashboard/screens/home_screen.dart';
+import 'package:adm_seller/modules/dashboard/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,13 +35,47 @@ class VendorProductsScreen extends StatelessWidget {
       const Center(child: Text('Products Screen'));
 }
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class AllCategoryScreen extends StatelessWidget {
+  const AllCategoryScreen({super.key});
   @override
   Widget build(BuildContext context) =>
       const Center(child: Text('Profile Screen'));
 }
 
+class VendorDashboardScreen extends StatelessWidget {
+  const VendorDashboardScreen({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Profile Screen'));
+}
+
+class VendorOrdersScreen extends StatelessWidget {
+  const VendorOrdersScreen({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Profile Screen'));
+}
+
+class RiderDashboardScreen extends StatelessWidget {
+  const RiderDashboardScreen({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Profile Screen'));
+}
+
+class RiderDeliveriesScreen extends StatelessWidget {
+  const RiderDeliveriesScreen({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Profile Screen'));
+}
+
+class RiderEarningsScreen extends StatelessWidget {
+  const RiderEarningsScreen({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Profile Screen'));
+}
 // ============================================================
 // NAVIGATION ITEM MODEL
 // ============================================================

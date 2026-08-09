@@ -4,6 +4,7 @@
 import 'package:adm_seller/core/api/api_service.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
+import 'package:adm_seller/modules/auth/models/verification_status_enum.dart';
 // import 'package:adm_seller/features/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/screens/auth_status_scaffold.dart';
@@ -108,6 +109,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   // ─── Submit ───
+
   Future<void> _submitProfile() async {
     if (!_isFormValid) return;
     FocusScope.of(context).unfocus();
@@ -143,10 +145,36 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         if (_upiId.text.trim().isNotEmpty) 'upiId': _upiId.text.trim(),
       };
 
-      await ref.read(apiServiceProvider).updateProfile(data);
+      // modules/auth/screens/profile_setup_screen.dart — replace the broken block
 
-      // Refresh auth state so router redirects to next step
-      ref.invalidate(authNotifierProvider);
+      final response = await ref.read(apiServiceProvider).updateProfile(data);
+      final profile = response.response;
+
+      // Map seller status to verification status for router navigation
+      final VerificationStatus newStatus;
+      if (profile.status.isActive) {
+        newStatus = VerificationStatus.verified;
+      } else if (profile.status.isManualReviewRequired) {
+        newStatus = VerificationStatus.underReview;
+      } else {
+        newStatus = VerificationStatus.pendingVerification;
+      }
+
+      // Update auth state via notifier method
+      await ref
+          .read(authNotifierProvider.notifier)
+          .updateUserVerificationStatus(newStatus);
+
+      // Update auth state directly to trigger router redirect
+      // final currentAuth = ref.read(authNotifierProvider).asData?.value;
+      // if (currentAuth is AuthAuthenticated) {
+      //   state = AsyncValue.data(
+      //     AuthAuthenticated(
+      //       accessToken: currentAuth.accessToken,
+      //       user: currentAuth.user.copyWith(verificationStatus: newStatus),
+      //     ),
+      //   );
+      // }
     } catch (e) {
       setState(() => _errorText = e.toString());
     } finally {

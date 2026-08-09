@@ -621,23 +621,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final phone = '+91${_mobileController.text.trim()}';
     final notifier = ref.read(authNotifierProvider.notifier);
 
-    await notifier.checkPhone(phone);
+    // Store the phone number before async operation
+    final String phoneNumber = phone;
 
-    if (!mounted) return;
+    await notifier.checkPhone(phoneNumber);
+
+    // CRITICAL: Check mounted after async operation
+    if (!mounted) {
+      print('Widget unmounted, cannot update state');
+      return;
+    }
+
     final authState = ref.read(authNotifierProvider).asData?.value;
+    print('AuthState after check: ${authState.runtimeType}'); // Add this debug
 
     if (authState is AuthPhoneChecked) {
-      // New user → name input
-      _phone = phone;
+      print("New user - showing name input");
+      _phone = phoneNumber;
       setState(() => _step = _AuthStep.name);
     } else if (authState is AuthOtpSent) {
-      // Existing user → OTP already sent by backend, go straight to OTP
-      _phone = phone;
+      print("Existing user - showing OTP input");
+      _phone = phoneNumber;
       _challengeToken = authState.challengeToken;
       _startCooldown(authState.cooldownSeconds);
       setState(() => _step = _AuthStep.otp);
     } else if (authState is AuthUnauthenticated) {
       setState(() => _errorText = authState.message ?? 'Something went wrong');
+    } else {
+      // Handle any other state
+      print('Unexpected auth state: ${authState.runtimeType}');
+      setState(() => _errorText = 'Unexpected error occurred');
     }
   }
 
