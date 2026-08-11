@@ -1,9 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 <!-- LOCATION PERMISSIONS -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> --> <!-- Uncomment if needed -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Uncomment if needed -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <uses-feature
         android:name="android.hardware.location.gps"
@@ -32,7 +35,7 @@
 
             <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="xxxxxxxxxxxxxxxxxxxxxxxxx"/> <!-- Replace with your API key -->
+                android:value="AIzaSyCkgyvNZ3rRNEh45y24PzAg6GfqbC7KwG0"/> <!-- Replace with your API key -->
 
                 
             <intent-filter>

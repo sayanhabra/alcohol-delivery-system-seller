@@ -1,9 +1,7 @@
-// modules/auth/screens/profile_setup_screen.dart
-
-// import 'package:adm_seller/api/api_service.dart';
 import 'package:adm_seller/core/api/api_service.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
+import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
 import 'package:adm_seller/modules/auth/models/verification_status_enum.dart';
 // import 'package:adm_seller/features/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
@@ -149,16 +147,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
       final response = await ref.read(apiServiceProvider).updateProfile(data);
       final profile = response.response;
+      final newStatus = profile.status;
 
       // Map seller status to verification status for router navigation
-      final VerificationStatus newStatus;
-      if (profile.status.isActive) {
-        newStatus = VerificationStatus.verified;
-      } else if (profile.status.isManualReviewRequired) {
-        newStatus = VerificationStatus.underReview;
-      } else {
-        newStatus = VerificationStatus.pendingVerification;
-      }
+      // final SellerStatus newStatus;
+      // if (profile.status.isActive) {
+      //   newStatus = SellerStatus.verified;
+      // } else if (profile.status.isManualReviewRequired) {
+      //   newStatus = SellerStatus.underReview;
+      // } else {
+      //   newStatus = SellerStatus.pendingVerification;
+      // }
 
       // Update auth state via notifier method
       await ref
@@ -184,7 +183,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   // ─── Helpers ───
   void _clearError() {
-    if (_errorText != null) setState(() => _errorText = null);
+    setState(() {
+      _errorText = null;
+    });
   }
 
   @override

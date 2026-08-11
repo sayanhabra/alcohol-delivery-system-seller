@@ -357,15 +357,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (authState is AuthAuthenticated) {
         final status = authState.user.verificationStatus;
 
-        if (status.isPendingProfile) {
+        if (status.isDraft) {
           return currentPath == AppRoutes.profileSetup
               ? null
               : AppRoutes.profileSetup;
         }
-        if (status.isVerified) {
-          return currentPath == AppRoutes.dashboard
-              ? null
-              : AppRoutes.dashboard;
+        if (status.isVerified || status.isAutoVerified) {
+          return null;
+          // return currentPath == AppRoutes.dashboard
+          //     ? null
+          //     : AppRoutes.dashboard;
         }
         return currentPath == AppRoutes.profile ? null : AppRoutes.profile;
       }

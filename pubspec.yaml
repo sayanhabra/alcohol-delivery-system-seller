@@ -33,6 +33,7 @@ dependencies:
   razorpay_flutter: ^1.4.5
   cached_network_image: ^3.4.1
   shared_preferences: ^2.5.5
+  # map_location_picker: ^3.1.0
   # hooks_riverpod: ^3.3.2
   # animated_text_kit: ^4.3.0
   # flutter_modular: ^7.1.0

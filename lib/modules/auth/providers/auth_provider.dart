@@ -232,7 +232,8 @@
 
 import 'package:adm_seller/core/api/api_client.dart';
 import 'package:adm_seller/core/api/api_service.dart';
-import 'package:adm_seller/modules/auth/models/verification_status_enum.dart';
+import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
+// import 'package:adm_seller/modules/auth/models/verification_status_enum.dart';
 // import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -463,7 +464,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     });
   }
 
-  Future<void> updateUserVerificationStatus(VerificationStatus status) async {
+  Future<void> updateUserVerificationStatus(SellerStatus status) async {
     final current = state.asData?.value;
     if (current is! AuthAuthenticated) return;
 

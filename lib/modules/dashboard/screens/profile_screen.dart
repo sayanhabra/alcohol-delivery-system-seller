@@ -2,12 +2,12 @@
 
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
+import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
 import 'package:adm_seller/modules/auth/models/user_model.dart';
-import 'package:adm_seller/modules/auth/models/verification_status_enum.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -15,7 +15,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final status = user?.verificationStatus ?? VerificationStatus.unknown;
+    final status = user?.verificationStatus ?? SellerStatus.unknown;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -50,7 +50,7 @@ class ProfileScreen extends ConsumerWidget {
                 items: [
                   _InfoRow(
                     label: 'Status',
-                    value: status.value,
+                    value: status.name,
                     valueColor: _statusColor(status),
                   ),
                 ],
@@ -73,14 +73,23 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Color _statusColor(VerificationStatus status) {
+  Color _statusColor(SellerStatus status) {
     return switch (status) {
-      VerificationStatus.verified => Colors.green,
-      VerificationStatus.pendingVerification => Colors.orange,
-      VerificationStatus.underReview => Colors.orange,
-      VerificationStatus.rejected => const Color(0xFF98001F),
-      VerificationStatus.blocked => Colors.grey,
-      _ => Colors.black54,
+      SellerStatus.draft => Colors.grey,
+
+      SellerStatus.pendingApproval => Colors.orange,
+
+      SellerStatus.autoVerified => Colors.green,
+
+      SellerStatus.manualReviewRequired => Colors.orange,
+
+      SellerStatus.verified => Colors.green,
+
+      SellerStatus.rejected => const Color(0xFF98001F),
+
+      SellerStatus.suspended => Colors.grey.shade700,
+
+      SellerStatus.unknown => Colors.black54,
     };
   }
 }
@@ -88,7 +97,7 @@ class ProfileScreen extends ConsumerWidget {
 // ==================== STATUS BANNER ====================
 
 class _StatusBanner extends StatelessWidget {
-  final VerificationStatus status;
+  final SellerStatus status;
 
   const _StatusBanner({required this.status});
 
@@ -156,12 +165,28 @@ class _StatusBanner extends StatelessWidget {
     );
   }
 
-  _BannerConfig _bannerConfig(VerificationStatus status) {
+  _BannerConfig _bannerConfig(SellerStatus status) {
     return switch (status) {
-      VerificationStatus.pendingVerification => _BannerConfig(
-        title: 'Documents Pending Verification',
+      SellerStatus.draft => _BannerConfig(
+        title: 'Complete Your Profile',
         subtitle:
-            'Your documents have been submitted and are being verified. This usually takes 24-48 hours.',
+            'Your profile is still in draft. Please complete all required information and submit your application.',
+        icon: Icons.edit_note_rounded,
+        bgColor: Colors.grey.withValues(alpha: 0.08),
+        borderColor: Colors.grey.withValues(alpha: 0.3),
+        iconColor: Colors.grey.shade700,
+        textColor: Colors.grey.shade800,
+        subtitleColor: Colors.grey.shade600,
+        actionLabel: 'Complete Profile →',
+        onAction: () {
+          // Navigate to profile completion
+        },
+      ),
+
+      SellerStatus.pendingApproval => _BannerConfig(
+        title: 'Pending Approval',
+        subtitle:
+            'Your application has been submitted and is waiting for approval.',
         icon: Icons.hourglass_top_rounded,
         bgColor: Colors.orange.withValues(alpha: 0.08),
         borderColor: Colors.orange.withValues(alpha: 0.3),
@@ -169,7 +194,20 @@ class _StatusBanner extends StatelessWidget {
         textColor: Colors.orange.shade900,
         subtitleColor: Colors.orange.shade700,
       ),
-      VerificationStatus.underReview => _BannerConfig(
+
+      SellerStatus.autoVerified => _BannerConfig(
+        title: 'Automatically Verified',
+        subtitle:
+            'Your seller account has been automatically verified successfully.',
+        icon: Icons.verified_rounded,
+        bgColor: Colors.green.withValues(alpha: 0.08),
+        borderColor: Colors.green.withValues(alpha: 0.3),
+        iconColor: Colors.green,
+        textColor: Colors.green.shade900,
+        subtitleColor: Colors.green.shade700,
+      ),
+
+      SellerStatus.manualReviewRequired => _BannerConfig(
         title: 'Account Under Review',
         subtitle:
             'Our team is reviewing your application. You will be notified once the review is complete.',
@@ -180,7 +218,19 @@ class _StatusBanner extends StatelessWidget {
         textColor: Colors.orange.shade900,
         subtitleColor: Colors.orange.shade700,
       ),
-      VerificationStatus.rejected => _BannerConfig(
+
+      SellerStatus.verified => _BannerConfig(
+        title: 'Account Verified',
+        subtitle: 'Your seller account has been verified successfully.',
+        icon: Icons.verified_rounded,
+        bgColor: Colors.green.withValues(alpha: 0.08),
+        borderColor: Colors.green.withValues(alpha: 0.3),
+        iconColor: Colors.green,
+        textColor: Colors.green.shade900,
+        subtitleColor: Colors.green.shade700,
+      ),
+
+      SellerStatus.rejected => _BannerConfig(
         title: 'Verification Rejected',
         subtitle:
             'Your verification was rejected. Please check the reason and re-submit your documents.',
@@ -196,10 +246,11 @@ class _StatusBanner extends StatelessWidget {
           // context.push('/auth/verification-submission');
         },
       ),
-      VerificationStatus.blocked => _BannerConfig(
-        title: 'Account Blocked',
+
+      SellerStatus.suspended => _BannerConfig(
+        title: 'Account Suspended',
         subtitle:
-            'Your account has been blocked. Please contact support for assistance.',
+            'Your seller account has been suspended. Please contact support for assistance.',
         icon: Icons.block_flipped,
         bgColor: Colors.grey.withValues(alpha: 0.08),
         borderColor: Colors.grey.withValues(alpha: 0.3),
@@ -208,11 +259,14 @@ class _StatusBanner extends StatelessWidget {
         subtitleColor: Colors.grey.shade600,
         actionLabel: 'Contact Support',
         onAction: () {
-          /* open support */
+          // Open support
         },
       ),
-      _ => _BannerConfig(
+
+      SellerStatus.unknown => _BannerConfig(
         title: 'Unknown Status',
+        subtitle:
+            'We could not determine the current status of your seller account.',
         icon: Icons.help_outline,
         bgColor: Colors.grey.withValues(alpha: 0.08),
         borderColor: Colors.grey.withValues(alpha: 0.3),

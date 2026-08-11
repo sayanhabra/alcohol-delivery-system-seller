@@ -1,3 +1,5 @@
+import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
+
 import 'verification_status_enum.dart';
 
 class UserModel {
@@ -7,7 +9,7 @@ class UserModel {
   final String? email;
   final String? profileImage;
   final String role;
-  final VerificationStatus verificationStatus;
+  final SellerStatus verificationStatus;
 
   const UserModel({
     required this.id,
@@ -27,7 +29,7 @@ class UserModel {
       email: json['email'] as String?,
       profileImage: json['profileImage'] as String?,
       role: json['role'] as String? ?? 'SELLER',
-      verificationStatus: VerificationStatus.fromString(
+      verificationStatus: SellerStatus.fromString(
         json['verificationStatus'] as String?,
       ),
     );
@@ -52,7 +54,7 @@ class UserModel {
     String? email,
     String? profileImage,
     String? role,
-    VerificationStatus? verificationStatus,
+    SellerStatus? verificationStatus,
   }) {
     return UserModel(
       id: id ?? this.id,
