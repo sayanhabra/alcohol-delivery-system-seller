@@ -2,6 +2,7 @@
 
 import 'package:adm_seller/core/navigation/navigation_config.dart';
 import 'package:adm_seller/core/shared/widgets/svg_icon.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,16 +21,19 @@ class BottomNavBar extends ConsumerWidget {
 
     if (items.isEmpty) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, -3),
           ),
@@ -43,8 +47,8 @@ class BottomNavBar extends ConsumerWidget {
         child: BottomNavigationBar(
           currentIndex: effectiveIndex,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF98001F),
+          backgroundColor: surfaceColor,
+          selectedItemColor: ColorName.primaryBrandRed,
           unselectedItemColor: Colors.grey,
           selectedLabelStyle: const TextStyle(
             fontSize: 11,
@@ -65,12 +69,12 @@ class BottomNavBar extends ConsumerWidget {
             return BottomNavigationBarItem(
               icon: SvgNavIcon(
                 assetPath: item.iconPath,
-                color: isSelected ? const Color(0xFF98001F) : Colors.grey,
+                color: isSelected ? ColorName.primaryBrandRed : Colors.grey,
                 size: 24,
               ),
               activeIcon: SvgNavIcon(
                 assetPath: item.activeIconPath,
-                color: const Color(0xFF98001F),
+                color: ColorName.primaryBrandRed,
                 size: 24,
                 isActive: true,
               ),
@@ -82,3 +86,4 @@ class BottomNavBar extends ConsumerWidget {
     );
   }
 }
+

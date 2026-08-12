@@ -1,5 +1,7 @@
 // modules/dashboard/screens/profile_screen.dart
 
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
 import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
@@ -16,9 +18,10 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
     final status = user?.verificationStatus ?? SellerStatus.unknown;
+    final isDark = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: isDark ? ColorName.primaryBackgroundDark : ColorName.primaryBackgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppStyle.spaceLarge),
@@ -85,7 +88,7 @@ class ProfileScreen extends ConsumerWidget {
 
       SellerStatus.verified => Colors.green,
 
-      SellerStatus.rejected => const Color(0xFF98001F),
+      SellerStatus.rejected => ColorName.primaryBrandRed,
 
       SellerStatus.suspended => Colors.grey.shade700,
 
@@ -106,7 +109,7 @@ class _StatusBanner extends StatelessWidget {
     // VERIFIED → no banner needed
     if (status.isVerified) return const SizedBox.shrink();
 
-    final config = _bannerConfig(status);
+    final config = _bannerConfig(context, status);
 
     return Container(
       width: double.infinity,
@@ -153,7 +156,7 @@ class _StatusBanner extends StatelessWidget {
               child: Text(
                 config.actionLabel!,
                 style: AppStyle.label.copyWith(
-                  color: const Color(0xFF98001F),
+                  color: ColorName.primaryBrandRed,
                   fontWeight: FontWeight.w600,
                   decoration: TextDecoration.underline,
                 ),
@@ -165,115 +168,115 @@ class _StatusBanner extends StatelessWidget {
     );
   }
 
-  _BannerConfig _bannerConfig(SellerStatus status) {
+  _BannerConfig _bannerConfig(BuildContext context, SellerStatus status) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return switch (status) {
       SellerStatus.draft => _BannerConfig(
-        title: 'Complete Your Profile',
-        subtitle:
-            'Your profile is still in draft. Please complete all required information and submit your application.',
-        icon: Icons.edit_note_rounded,
-        bgColor: Colors.grey.withValues(alpha: 0.08),
-        borderColor: Colors.grey.withValues(alpha: 0.3),
-        iconColor: Colors.grey.shade700,
-        textColor: Colors.grey.shade800,
-        subtitleColor: Colors.grey.shade600,
-        actionLabel: 'Complete Profile →',
-        onAction: () {
-          // Navigate to profile completion
-        },
-      ),
+          title: 'Complete Your Profile',
+          subtitle:
+              'Your profile is still in draft. Please complete all required information and submit your application.',
+          icon: Icons.edit_note_rounded,
+          bgColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
+          borderColor: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
+          iconColor: isDark ? Colors.white70 : Colors.grey.shade700,
+          textColor: isDark ? Colors.white : Colors.grey.shade800,
+          subtitleColor: isDark ? Colors.white70 : Colors.grey.shade600,
+          actionLabel: 'Complete Profile →',
+          onAction: () {
+            // Navigate to profile completion
+          },
+        ),
 
       SellerStatus.pendingApproval => _BannerConfig(
-        title: 'Pending Approval',
-        subtitle:
-            'Your application has been submitted and is waiting for approval.',
-        icon: Icons.hourglass_top_rounded,
-        bgColor: Colors.orange.withValues(alpha: 0.08),
-        borderColor: Colors.orange.withValues(alpha: 0.3),
-        iconColor: Colors.orange,
-        textColor: Colors.orange.shade900,
-        subtitleColor: Colors.orange.shade700,
-      ),
+          title: 'Pending Approval',
+          subtitle:
+              'Your application has been submitted and is waiting for approval.',
+          icon: Icons.hourglass_top_rounded,
+          bgColor: Colors.orange.withValues(alpha: 0.08),
+          borderColor: Colors.orange.withValues(alpha: 0.3),
+          iconColor: Colors.orange,
+          textColor: isDark ? Colors.orangeAccent : Colors.orange.shade900,
+          subtitleColor: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
+        ),
 
       SellerStatus.autoVerified => _BannerConfig(
-        title: 'Automatically Verified',
-        subtitle:
-            'Your seller account has been automatically verified successfully.',
-        icon: Icons.verified_rounded,
-        bgColor: Colors.green.withValues(alpha: 0.08),
-        borderColor: Colors.green.withValues(alpha: 0.3),
-        iconColor: Colors.green,
-        textColor: Colors.green.shade900,
-        subtitleColor: Colors.green.shade700,
-      ),
+          title: 'Automatically Verified',
+          subtitle:
+              'Your seller account has been automatically verified successfully.',
+          icon: Icons.verified_rounded,
+          bgColor: Colors.green.withValues(alpha: 0.08),
+          borderColor: Colors.green.withValues(alpha: 0.3),
+          iconColor: Colors.green,
+          textColor: isDark ? Colors.greenAccent : Colors.green.shade900,
+          subtitleColor: isDark ? Colors.green.shade200 : Colors.green.shade700,
+        ),
 
       SellerStatus.manualReviewRequired => _BannerConfig(
-        title: 'Account Under Review',
-        subtitle:
-            'Our team is reviewing your application. You will be notified once the review is complete.',
-        icon: Icons.visibility_rounded,
-        bgColor: Colors.orange.withValues(alpha: 0.08),
-        borderColor: Colors.orange.withValues(alpha: 0.3),
-        iconColor: Colors.orange,
-        textColor: Colors.orange.shade900,
-        subtitleColor: Colors.orange.shade700,
-      ),
+          title: 'Account Under Review',
+          subtitle:
+              'Our team is reviewing your application. You will be notified once the review is complete.',
+          icon: Icons.visibility_rounded,
+          bgColor: Colors.orange.withValues(alpha: 0.08),
+          borderColor: Colors.orange.withValues(alpha: 0.3),
+          iconColor: Colors.orange,
+          textColor: isDark ? Colors.orangeAccent : Colors.orange.shade900,
+          subtitleColor: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
+        ),
 
       SellerStatus.verified => _BannerConfig(
-        title: 'Account Verified',
-        subtitle: 'Your seller account has been verified successfully.',
-        icon: Icons.verified_rounded,
-        bgColor: Colors.green.withValues(alpha: 0.08),
-        borderColor: Colors.green.withValues(alpha: 0.3),
-        iconColor: Colors.green,
-        textColor: Colors.green.shade900,
-        subtitleColor: Colors.green.shade700,
-      ),
+          title: 'Account Verified',
+          subtitle: 'Your seller account has been verified successfully.',
+          icon: Icons.verified_rounded,
+          bgColor: Colors.green.withValues(alpha: 0.08),
+          borderColor: Colors.green.withValues(alpha: 0.3),
+          iconColor: Colors.green,
+          textColor: isDark ? Colors.greenAccent : Colors.green.shade900,
+          subtitleColor: isDark ? Colors.green.shade200 : Colors.green.shade700,
+        ),
 
       SellerStatus.rejected => _BannerConfig(
-        title: 'Verification Rejected',
-        subtitle:
-            'Your verification was rejected. Please check the reason and re-submit your documents.',
-        icon: Icons.cancel_outlined,
-        bgColor: const Color(0xFF98001F).withValues(alpha: 0.06),
-        borderColor: const Color(0xFF98001F).withValues(alpha: 0.2),
-        iconColor: const Color(0xFF98001F),
-        textColor: const Color(0xFF98001F),
-        subtitleColor: Colors.red.shade700,
-        actionLabel: 'Re-upload Documents →',
-        onAction: () {
-          // Navigate to verification submission
-          // context.push('/auth/verification-submission');
-        },
-      ),
+          title: 'Verification Rejected',
+          subtitle:
+              'Your verification was rejected. Please check the reason and re-submit your documents.',
+          icon: Icons.cancel_outlined,
+          bgColor: isDark ? Colors.redAccent.withValues(alpha: 0.08) : ColorName.primaryBrandRed.withValues(alpha: 0.06),
+          borderColor: isDark ? Colors.redAccent.withValues(alpha: 0.3) : ColorName.primaryBrandRed.withValues(alpha: 0.2),
+          iconColor: isDark ? Colors.redAccent : ColorName.primaryBrandRed,
+          textColor: isDark ? Colors.redAccent : ColorName.primaryBrandRed,
+          subtitleColor: isDark ? Colors.red.shade200 : Colors.red.shade700,
+          actionLabel: 'Re-upload Documents →',
+          onAction: () {
+            // Navigate to verification submission
+          },
+        ),
 
       SellerStatus.suspended => _BannerConfig(
-        title: 'Account Suspended',
-        subtitle:
-            'Your seller account has been suspended. Please contact support for assistance.',
-        icon: Icons.block_flipped,
-        bgColor: Colors.grey.withValues(alpha: 0.08),
-        borderColor: Colors.grey.withValues(alpha: 0.3),
-        iconColor: Colors.grey.shade700,
-        textColor: Colors.grey.shade800,
-        subtitleColor: Colors.grey.shade600,
-        actionLabel: 'Contact Support',
-        onAction: () {
-          // Open support
-        },
-      ),
+          title: 'Account Suspended',
+          subtitle:
+              'Your seller account has been suspended. Please contact support for assistance.',
+          icon: Icons.block_flipped,
+          bgColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
+          borderColor: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
+          iconColor: isDark ? Colors.white70 : Colors.grey.shade700,
+          textColor: isDark ? Colors.white : Colors.grey.shade800,
+          subtitleColor: isDark ? Colors.white70 : Colors.grey.shade600,
+          actionLabel: 'Contact Support',
+          onAction: () {
+            // Open support
+          },
+        ),
 
       SellerStatus.unknown => _BannerConfig(
-        title: 'Unknown Status',
-        subtitle:
-            'We could not determine the current status of your seller account.',
-        icon: Icons.help_outline,
-        bgColor: Colors.grey.withValues(alpha: 0.08),
-        borderColor: Colors.grey.withValues(alpha: 0.3),
-        iconColor: Colors.grey,
-        textColor: Colors.black87,
-        subtitleColor: Colors.grey,
-      ),
+          title: 'Unknown Status',
+          subtitle:
+              'We could not determine the current status of your seller account.',
+          icon: Icons.help_outline,
+          bgColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
+          borderColor: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
+          iconColor: isDark ? Colors.white70 : Colors.grey,
+          textColor: isDark ? Colors.white : Colors.black87,
+          subtitleColor: isDark ? Colors.white70 : Colors.grey,
+        ),
     };
   }
 }
@@ -320,7 +323,7 @@ class _ProfileHeader extends StatelessWidget {
             width: 90,
             height: 90,
             decoration: BoxDecoration(
-              color: const Color(0xFF98001F).withValues(alpha: 0.1),
+              color: ColorName.primaryBrandRed.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: user?.profileImage != null
@@ -333,18 +336,23 @@ class _ProfileHeader extends StatelessWidget {
                 : const Icon(
                     Icons.storefront,
                     size: 40,
-                    color: Color(0xFF98001F),
+                    color: ColorName.primaryBrandRed,
                   ),
           ),
           const SizedBox(height: AppStyle.spaceMedium),
           Text(
             user?.name ?? 'Seller',
-            style: AppStyle.heading4.copyWith(fontWeight: FontWeight.w600),
+            style: AppStyle.heading4.copyWith(
+              color: Theme.of(context).textTheme.displayLarge?.color,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             '+91 ${user?.phone ?? ''}',
-            style: AppStyle.bodyMedium.copyWith(color: Colors.grey),
+            style: AppStyle.bodyMedium.copyWith(
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.grey,
+            ),
           ),
         ],
       ),
@@ -366,9 +374,9 @@ class _InfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppStyle.spaceLarge),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: AppStyle.borderRadiusMedium,
-        border: Border.all(color: AppStyle.borderColor, width: 1),
+        border: Border.all(color: context.customColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,6 +404,8 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppStyle.spaceSmall),
       child: Row(
@@ -403,12 +413,14 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppStyle.bodyMedium.copyWith(color: Colors.grey.shade600),
+            style: AppStyle.bodyMedium.copyWith(
+              color: isDark ? Colors.white54 : Colors.grey.shade600,
+            ),
           ),
           Text(
             value,
             style: AppStyle.bodyMedium.copyWith(
-              color: valueColor ?? Colors.black87,
+              color: valueColor ?? (isDark ? Colors.white : Colors.black87),
               fontWeight: FontWeight.w500,
             ),
           ),

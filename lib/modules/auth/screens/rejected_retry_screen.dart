@@ -1,5 +1,5 @@
-// modules/auth/screens/rejected_retry_screen.dart
-
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
 import 'package:adm_seller/modules/auth/screens/auth_status_scaffold.dart';
@@ -12,6 +12,8 @@ class RejectedRetryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = context.isDarkMode;
+
     return AuthStatusScaffold(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -26,7 +28,7 @@ class RejectedRetryScreen extends ConsumerWidget {
             child: const Icon(
               Icons.cancel_outlined,
               size: 48,
-              color: Color(0xFF98001F),
+              color: ColorName.primaryBrandRed,
             ),
           ),
           const SizedBox(height: AppStyle.spaceXXLarge),
@@ -51,9 +53,9 @@ class RejectedRetryScreen extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(AppStyle.spaceLarge),
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.04),
+              color: isDark ? Colors.redAccent.withValues(alpha: 0.08) : Colors.red.withValues(alpha: 0.04),
               border: Border.all(
-                color: Colors.red.withValues(alpha: 0.2),
+                color: isDark ? Colors.redAccent.withValues(alpha: 0.4) : Colors.red.withValues(alpha: 0.2),
                 width: 1.5,
               ),
               borderRadius: AppStyle.borderRadiusMedium,
@@ -64,7 +66,7 @@ class RejectedRetryScreen extends ConsumerWidget {
                 Text(
                   'Reason:',
                   style: AppStyle.titleSmall.copyWith(
-                    color: const Color(0xFF98001F),
+                    color: ColorName.primaryBrandRed,
                   ),
                 ),
                 const SizedBox(height: AppStyle.spaceSmall),
@@ -96,7 +98,7 @@ class RejectedRetryScreen extends ConsumerWidget {
             child: Text(
               'Contact Support',
               style: AppStyle.label.copyWith(
-                color: const Color(0xFF98001F),
+                color: ColorName.primaryBrandRed,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -106,3 +108,4 @@ class RejectedRetryScreen extends ConsumerWidget {
     );
   }
 }
+

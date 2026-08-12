@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 
 /// ============================================================
 /// COMMON INPUT DECORATION
@@ -12,6 +13,7 @@ class AppInputDecoration {
   AppInputDecoration._();
 
   static InputDecoration build({
+    BuildContext? context,
     String? hint,
     Widget? label,
     Widget? prefixIcon,
@@ -19,10 +21,10 @@ class AppInputDecoration {
     String? errorText,
     double borderRadius = 9,
     EdgeInsetsGeometry? contentPadding,
-    Color fillColor = const Color(0xFFF6F6F6),
-    Color borderColor = const Color(0x24000000),
-    Color focusedBorderColor = const Color(0xFF5E6162),
-    Color errorBorderColor = Colors.red,
+    Color? fillColor,
+    Color? borderColor,
+    Color? focusedBorderColor,
+    Color? errorBorderColor,
     bool filled = true,
     BoxConstraints? prefixIconConstraints,
     BoxConstraints? suffixIconConstraints,
@@ -34,6 +36,13 @@ class AppInputDecoration {
       );
     }
 
+    final bool isDark = context != null && Theme.of(context).brightness == Brightness.dark;
+
+    final resolvedFillColor = fillColor ?? (isDark ? ColorName.inputFillDark : ColorName.inputFillLight);
+    final resolvedBorderColor = borderColor ?? (isDark ? Colors.white24 : ColorName.inputBorderLight);
+    final resolvedFocusedBorderColor = focusedBorderColor ?? (isDark ? ColorName.secondary : ColorName.greyDark);
+    final resolvedErrorBorderColor = errorBorderColor ?? (isDark ? Colors.redAccent : Colors.red);
+
     return InputDecoration(
       hintText: hint,
       label: label,
@@ -42,7 +51,7 @@ class AppInputDecoration {
       errorText: errorText,
 
       filled: filled,
-      fillColor: fillColor,
+      fillColor: resolvedFillColor,
 
       contentPadding:
           contentPadding ??
@@ -53,19 +62,19 @@ class AppInputDecoration {
 
       counterText: '',
 
-      enabledBorder: border(borderColor),
+      enabledBorder: border(resolvedBorderColor),
 
-      focusedBorder: border(focusedBorderColor, width: 1.5),
+      focusedBorder: border(resolvedFocusedBorderColor, width: 1.5),
 
-      disabledBorder: border(borderColor.withValues(alpha: 0.5)),
+      disabledBorder: border(resolvedBorderColor.withValues(alpha: 0.5)),
 
-      errorBorder: border(errorBorderColor),
+      errorBorder: border(resolvedErrorBorderColor),
 
-      focusedErrorBorder: border(errorBorderColor, width: 1.5),
+      focusedErrorBorder: border(resolvedErrorBorderColor, width: 1.5),
 
-      border: border(borderColor),
+      border: border(resolvedBorderColor),
 
-      floatingLabelStyle: TextStyle(color: focusedBorderColor),
+      floatingLabelStyle: TextStyle(color: resolvedFocusedBorderColor),
 
       alignLabelWithHint: true,
     );
@@ -222,6 +231,7 @@ class AppTextField extends StatelessWidget {
       decoration:
           decoration ??
           AppInputDecoration.build(
+            context: context,
             hint: hint,
             label: label,
             prefixIcon: prefixIcon,
@@ -231,7 +241,13 @@ class AppTextField extends StatelessWidget {
             contentPadding: contentPadding,
             prefixIconConstraints: prefixIconConstraints,
             suffixIconConstraints: suffixIconConstraints,
-          ).copyWith(hintStyle: hintStyle),
+          ).copyWith(
+            hintStyle: hintStyle ?? TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white30
+                  : Colors.black38,
+            ),
+          ),
     );
   }
 }
@@ -431,6 +447,7 @@ class AppDropDown<T> extends StatelessWidget {
       decoration:
           decoration ??
           AppInputDecoration.build(
+            context: context,
             label: label,
             prefixIcon: prefixIcon,
             suffixIcon: suffix,

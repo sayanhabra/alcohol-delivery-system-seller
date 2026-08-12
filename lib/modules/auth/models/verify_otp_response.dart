@@ -5,11 +5,13 @@ import 'user_model.dart';
 
 class VerifyOtpResponseData {
   final String accessToken;
+  final String refreshToken;
   final NextStep nextStep;
   final UserModel user;
 
   const VerifyOtpResponseData({
     required this.accessToken,
+    required this.refreshToken,
     required this.nextStep,
     required this.user,
   });
@@ -17,6 +19,7 @@ class VerifyOtpResponseData {
   factory VerifyOtpResponseData.fromJson(Map<String, dynamic> json) {
     return VerifyOtpResponseData(
       accessToken: json['accessToken'] as String? ?? '',
+      refreshToken: json['refreshToken'] as String? ?? '',
       nextStep: NextStep.fromString(json['nextStep'] as String?),
       user: UserModel.fromJson(json['user'] as Map<String, dynamic>? ?? {}),
     );
@@ -25,6 +28,7 @@ class VerifyOtpResponseData {
   Map<String, dynamic> toJson() {
     return {
       'accessToken': accessToken,
+      'refreshToken': refreshToken,
       'nextStep': nextStep.value,
       'user': user.toJson(),
     };
@@ -61,7 +65,12 @@ class VerifyOtpResponse {
   }
 
   bool get isSuccess => statusCode == 200;
+
   String get accessToken => response.accessToken;
+
+  String get refreshToken => response.refreshToken;
+
   NextStep get nextStep => response.nextStep;
+
   UserModel get user => response.user;
 }

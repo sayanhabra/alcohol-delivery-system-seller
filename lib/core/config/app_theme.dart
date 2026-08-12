@@ -77,13 +77,13 @@ class AppTheme {
       // ================= INPUT =================
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFF6F6F6).withValues(alpha: 0.58),
+        fillColor: ColorName.inputFillLight.withValues(alpha: 0.58),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
         ),
-        border: _inputBorder(const Color(0x24000000)),
-        enabledBorder: _inputBorder(const Color(0x24000000)),
+        border: _inputBorder(ColorName.inputBorderLight),
+        enabledBorder: _inputBorder(ColorName.inputBorderLight),
         focusedBorder: _inputBorder(ColorName.primary, width: 1.5),
         errorBorder: _inputBorder(Colors.red),
         focusedErrorBorder: _inputBorder(Colors.red, width: 1.5),
@@ -91,7 +91,7 @@ class AppTheme {
 
       // ================= DIVIDER =================
       dividerTheme: const DividerThemeData(
-        color: Color(0xFFE5E5E5),
+        color: ColorName.dividerLight,
         thickness: 1,
         space: 1,
       ),
@@ -100,7 +100,7 @@ class AppTheme {
       textTheme: _textTheme(Colors.black),
 
       // ================= ICON =================
-      iconTheme: const IconThemeData(color: Color(0xFF333333)),
+      iconTheme: const IconThemeData(color: ColorName.iconLight),
 
       // ================= BOTTOM SHEET =================
       bottomSheetTheme: const BottomSheetThemeData(
@@ -128,7 +128,7 @@ class AppTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: ColorName.primary,
       brightness: Brightness.dark,
-      surface: const Color(0xFF252A2E),
+      surface: ColorName.surfaceDark,
     );
 
     return ThemeData(
@@ -169,7 +169,7 @@ class AppTheme {
       // ================= INPUT =================
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF3B4147),
+        fillColor: ColorName.inputFillDark,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
@@ -279,10 +279,10 @@ class CustomColors extends ThemeExtension<CustomColors> {
   /// ==========================================================
 
   static const light = CustomColors(
-    success: Color(0xFF28A745),
-    info: Color(0xFF17A2B8),
-    warning: Color(0xFFFFC107),
-    danger: Color(0xFFDC3545),
+    success: ColorName.successLight,
+    info: ColorName.infoLight,
+    warning: ColorName.warningLight,
+    danger: ColorName.dangerLight,
 
     cardBackground: Colors.white,
 
@@ -290,9 +290,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
 
     primaryBackground: ColorName.primaryBackgroundLight,
 
-    secondaryText: Color(0xFF6B7280),
+    secondaryText: ColorName.secondaryTextLight,
 
-    border: Color(0xFFE5E7EB),
+    border: ColorName.borderLightGray,
   );
 
   /// ==========================================================
@@ -300,10 +300,10 @@ class CustomColors extends ThemeExtension<CustomColors> {
   /// ==========================================================
 
   static const dark = CustomColors(
-    success: Color(0xFF00BC8C),
-    info: Color(0xFF17A2B8),
-    warning: Color(0xFFF39C12),
-    danger: Color(0xFFE74C3C),
+    success: ColorName.successDark,
+    info: ColorName.infoDark,
+    warning: ColorName.warningDark,
+    danger: ColorName.dangerDark,
 
     cardBackground: ColorName.primary,
 
@@ -311,9 +311,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
 
     primaryBackground: ColorName.primaryBackgroundDark,
 
-    secondaryText: Color(0xFFB0B5BA),
+    secondaryText: ColorName.secondaryTextDark,
 
-    border: Color(0xFF454B51),
+    border: ColorName.borderDark,
   );
 
   @override

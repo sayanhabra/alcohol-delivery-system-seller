@@ -43,12 +43,14 @@ class ApiHandler {
     Map<String, dynamic>? headers,
     RequestContentType contentType = RequestContentType.formData,
     String? errorMessage,
+    Map<String, dynamic>? extra,
   }) async {
     return _execute<T>(
       method: 'POST',
       endpoint: endpoint,
       fromJson: fromJson,
       data: data,
+      extra: extra,
       queryParameters: queryParameters,
       headers: headers,
       contentType: contentType,
@@ -284,6 +286,7 @@ class ApiHandler {
     required String endpoint,
     required T Function(Map<String, dynamic>) fromJson,
     dynamic data,
+    Map<String, dynamic>? extra,
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
     RequestContentType contentType = RequestContentType.formData,
@@ -311,10 +314,12 @@ class ApiHandler {
       final response = await _dio.request(
         endpoint,
         data: requestData,
+
         queryParameters: queryParameters,
         options: Options(
           method: method,
           headers: headers,
+          extra: extra,
           contentType: contentType == RequestContentType.json
               ? Headers.jsonContentType
               : contentType == RequestContentType.formData
@@ -381,45 +386,77 @@ class ApiHandler {
   // =========================================================================
 
   Exception _parseError(DioException e, String errorMessage) {
+    // ============================================================
+    // SERVER RESPONSE EXISTS
+    // ============================================================
     if (e.response != null) {
       final statusCode = e.response?.statusCode;
       final errorData = e.response?.data;
 
-      String message;
-      if (errorData is Map<String, dynamic>) {
-        message =
+      dynamic rawMessage;
+
+      if (errorData is Map) {
+        rawMessage =
             errorData['message'] ??
             errorData['error'] ??
             errorData['msg'] ??
-            errorData['detail'] ??
-            '$errorMessage (Status: $statusCode)';
+            errorData['detail'];
       } else if (errorData is String) {
-        message = errorData;
-      } else {
+        rawMessage = errorData;
+      }
+
+      String message;
+
+      // API returned a String
+      if (rawMessage is String && rawMessage.trim().isNotEmpty) {
+        message = rawMessage;
+      }
+      // API returned a List of validation errors
+      else if (rawMessage is List) {
+        final messages = rawMessage
+            .map((item) => item.toString().trim())
+            .where((item) => item.isNotEmpty)
+            .toList();
+
+        message = messages.isNotEmpty
+            ? messages.join('\n')
+            : '$errorMessage (Status: $statusCode)';
+      }
+      // No usable message
+      else {
         message = '$errorMessage (Status: $statusCode)';
       }
 
       return Exception(message);
     }
 
+    // ============================================================
+    // NETWORK / DIO ERRORS
+    // ============================================================
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
+      case DioExceptionType.transformTimeout:
         return Exception('Connection timeout. Please try again.');
+
       case DioExceptionType.connectionError:
         return Exception('No internet connection. Please check your network.');
+
       case DioExceptionType.badCertificate:
         return Exception(
           'SSL certificate error. Please check your connection.',
         );
+
       case DioExceptionType.badResponse:
         return Exception('Server returned an invalid response.');
+
       case DioExceptionType.cancel:
         return Exception('Request was cancelled.');
+
       case DioExceptionType.unknown:
-      default:
-        return Exception('Network error: ${e.message}');
+        return Exception('Network error: ${e.message ?? 'Unknown error'}');
     }
   }
 }

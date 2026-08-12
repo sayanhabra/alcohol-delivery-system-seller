@@ -1,11 +1,13 @@
 import 'package:adm_seller/core/api/api_service.dart';
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
-import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
-import 'package:adm_seller/modules/auth/models/verification_status_enum.dart';
+
 // import 'package:adm_seller/features/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/screens/auth_status_scaffold.dart';
+import 'package:adm_seller/modules/auth/screens/location_picker_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,6 +84,46 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     _ifscCode.dispose();
     _upiId.dispose();
     super.dispose();
+  }
+
+  Future<void> _openLocationPicker() async {
+    final result = await Navigator.push<LocationPickerResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          initialLatitude: double.tryParse(_latitude.text),
+          initialLongitude: double.tryParse(_longitude.text),
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    setState(() {
+      // Coordinates
+      _latitude.text = result.latitude.toString();
+      _longitude.text = result.longitude.toString();
+
+      // Address
+      _addressLine1.text = result.addressLine1;
+
+      // City
+      _city.text = result.city;
+
+      // State
+      _state.text = result.state;
+
+      // Pincode
+      _pincode.text = result.pincode;
+    });
+
+    debugPrint('========== LOCATION PICKED ==========');
+    debugPrint('Latitude: ${result.latitude}');
+    debugPrint('Longitude: ${result.longitude}');
+    debugPrint('Address: ${result.addressLine1}');
+    debugPrint('City: ${result.city}');
+    debugPrint('State: ${result.state}');
+    debugPrint('Pincode: ${result.pincode}');
   }
 
   // ─── Date Picker ───
@@ -175,7 +217,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       //   );
       // }
     } catch (e) {
-      setState(() => _errorText = e.toString());
+      if (!mounted) return;
+
+      final errorMessage = e.toString().replaceFirst('Exception: ', '');
+
+      setState(() {
+        _errorText = errorMessage;
+      });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -190,6 +238,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return AuthStatusScaffold(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,13 +253,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 Text(
                   'Setup Your Store',
                   textAlign: TextAlign.center,
-                  style: AppStyle.heading3.copyWith(color: Colors.black87),
+                  style: AppStyle.heading3.copyWith(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
                 const SizedBox(height: AppStyle.spaceSmall),
                 Text(
                   'Complete your profile to start selling',
                   textAlign: TextAlign.center,
-                  style: AppStyle.bodyMedium.copyWith(color: Colors.black54),
+                  style: AppStyle.bodyMedium.copyWith(
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
                 ),
               ],
             ),
@@ -312,6 +366,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           // ═══════════════════════════════════════════════════════
           _sectionTitle('Address'),
           const SizedBox(height: AppStyle.spaceMedium),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton.icon(
+              onPressed: _openLocationPicker,
+              icon: const Icon(Icons.location_on_outlined),
+              label: const Text('Pick Location on Map'),
+            ),
+          ),
+          const SizedBox(height: AppStyle.spaceLarge),
           _buildField(
             controller: _addressLine1,
             label: 'Address Line 1 *',
@@ -359,34 +423,62 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             ],
             onChanged: (_) => _clearError(),
           ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          Row(
-            children: [
-              Expanded(
-                child: _buildField(
-                  controller: _latitude,
-                  label: 'Latitude *',
-                  hint: '12.9715987',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  onChanged: (_) => _clearError(),
-                ),
-              ),
-              const SizedBox(width: AppStyle.spaceMedium),
-              Expanded(
-                child: _buildField(
-                  controller: _longitude,
-                  label: 'Longitude *',
-                  hint: '77.5945627',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  onChanged: (_) => _clearError(),
-                ),
-              ),
-            ],
-          ),
+          // const SizedBox(height: AppStyle.spaceLarge),
+
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       child: _buildField(
+          //         controller: _latitude,
+          //         label: 'Latitude *',
+          //         hint: '12.9715987',
+          //         keyboardType: const TextInputType.numberWithOptions(
+          //           decimal: true,
+          //         ),
+          //         onChanged: (_) => _clearError(),
+          //       ),
+          //     ),
+          //     const SizedBox(width: AppStyle.spaceMedium),
+          //     Expanded(
+          //       child: _buildField(
+          //         controller: _longitude,
+          //         label: 'Longitude *',
+          //         hint: '77.5945627',
+          //         keyboardType: const TextInputType.numberWithOptions(
+          //           decimal: true,
+          //         ),
+          //         onChanged: (_) => _clearError(),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          //           Row(
+          //   children: [
+          //     Expanded(
+          //       child: BuildTextField(
+          //         label: 'Latitude',
+          //         controller: _latitude,
+          //         keyboardType:
+          //             const TextInputType.numberWithOptions(
+          //           decimal: true,
+          //           signed: true,
+          //         ),
+          //       ),
+          //     ),
+          //     const SizedBox(width: 12),
+          //     Expanded(
+          //       child: BuildTextField(
+          //         label: 'Longitude',
+          //         controller: _longitude,
+          //         keyboardType:
+          //             const TextInputType.numberWithOptions(
+          //           decimal: true,
+          //           signed: true,
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           const SizedBox(height: AppStyle.spaceXLarge),
 
           // ═══════════════════════════════════════════════════════
@@ -427,7 +519,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               child: Text(
                 _errorText!,
                 textAlign: TextAlign.center,
-                style: AppStyle.bodySmall.copyWith(color: Colors.red.shade700),
+                style: AppStyle.bodySmall.copyWith(
+                  color: isDark ? Colors.redAccent : Colors.red.shade700,
+                ),
               ),
             ),
 
@@ -459,7 +553,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     return Text(
       text,
       style: AppStyle.titleLarge.copyWith(
-        color: const Color(0xFF98001F),
+        color: ColorName.primaryBrandRed,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -490,9 +584,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization,
-          maxLength: maxLength,
-          onChanged: onChanged,
-          decoration: _inputDecoration(hint: hint),
+          style: TextStyle(
+            color: context.isDarkMode ? Colors.white : Colors.black87,
+          ),
+          decoration: _inputDecoration(context, hint: hint),
         ),
       ],
     );
@@ -517,10 +612,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           controller: controller,
           readOnly: true,
           onTap: () => _pickDate(controller),
-          decoration: _inputDecoration(hint: hint).copyWith(
+          style: TextStyle(
+            color: context.isDarkMode ? Colors.white : Colors.black87,
+          ),
+          decoration: _inputDecoration(context, hint: hint).copyWith(
             suffixIcon: const Icon(
               Icons.calendar_today_outlined,
-              color: Color(0xFF98001F),
+              color: ColorName.primaryBrandRed,
               size: 20,
             ),
           ),
@@ -529,21 +627,25 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     );
   }
 
-  InputDecoration _inputDecoration({required String hint}) {
+  InputDecoration _inputDecoration(BuildContext context, {required String hint}) {
+    final isDark = context.isDarkMode;
     return InputDecoration(
       hintText: hint,
-      hintStyle: AppStyle.bodyMedium.copyWith(color: const Color(0xFFBBBBBB)),
+      hintStyle: AppStyle.bodyMedium.copyWith(color: ColorName.lightGreyBorder),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppStyle.spaceLarge,
         vertical: AppStyle.spaceLarge,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: AppStyle.borderRadiusMedium,
-        borderSide: const BorderSide(color: AppStyle.borderColor, width: 1.5),
+        borderSide: BorderSide(color: context.customColors.border, width: 1.5),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: AppStyle.borderRadiusMedium,
-        borderSide: const BorderSide(color: Color(0xFF98001F), width: 2),
+        borderSide: BorderSide(
+          color: isDark ? ColorName.secondary : ColorName.primaryBrandRed,
+          width: 2,
+        ),
       ),
       counterText: '',
     );

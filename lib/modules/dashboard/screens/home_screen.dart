@@ -1,3 +1,5 @@
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/helpers/location_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,17 +121,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? ColorName.surfaceDark : Colors.white,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: isDark ? Colors.white : Colors.black,
         centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: _getCurrentLocation,
-        child: Center(child: Text("Home")),
+        child: Center(
+          child: Text(
+            "Home",
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+        ),
       ),
     );
   }

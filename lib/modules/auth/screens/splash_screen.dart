@@ -1,8 +1,11 @@
 import 'package:adm_seller/core/config/app_router.dart';
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -39,25 +42,39 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.dispose();
   }
 
-  void _onNext() {
+  Future<void> _onNext() async {
     if (_currentPage < _onboardingData.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
       );
     } else {
+      final prefs = await SharedPreferences.getInstance();
+
+      await prefs.setBool('onboarding_completed', true);
+
+      if (!mounted) return;
+
       context.go(AppRoutes.login);
     }
   }
 
-  void _onSkip() {
+  Future<void> _onSkip() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('onboarding_completed', true);
+
+    if (!mounted) return;
+
     context.go(AppRoutes.login);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? ColorName.primaryBackgroundDark : Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -69,7 +86,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 child: Text(
                   'Skip',
                   style: TextStyle(
-                    color: const Color(0xFFE57373),
+                    color: ColorName.skipRed,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -96,10 +113,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                           Text(
                             _onboardingData[index]['title']!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
                         // const SizedBox(height: 20),
@@ -114,10 +131,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                           Text(
                             _onboardingData[index]['subtitle']!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Colors.black54,
+                              color: isDark ? Colors.white70 : Colors.black54,
                             ),
                           ),
                       ],
@@ -138,8 +155,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   height: _currentPage == index ? 8 : 6,
                   decoration: BoxDecoration(
                     color: _currentPage == index
-                        ? const Color(0xFF98001F)
-                        : Colors.grey.shade300,
+                        ? ColorName.primaryBrandRed
+                        : (isDark ? Colors.white24 : Colors.grey.shade300),
                     shape: BoxShape.circle,
                   ),
                 ),

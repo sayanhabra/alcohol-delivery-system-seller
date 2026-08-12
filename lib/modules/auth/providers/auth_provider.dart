@@ -422,13 +422,14 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     });
   }
 
-  Future<void> verifyOtp({
+  Future verifyOtp({
     required String phone,
     required String code,
     String? name,
     required String challengeToken,
   }) async {
     state = const AsyncLoading();
+
     state = await AsyncValue.guard(() async {
       try {
         final request = VerifyOtpRequest(
@@ -437,19 +438,49 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
           name: name,
           challengeToken: challengeToken,
         );
-        final response = await _apiService.verifyOtp(request);
-        final accessToken = response.accessToken;
 
-        await _tokenStorage.saveTokens(accessToken, null);
+        final response = await _apiService.verifyOtp(request);
+
+        final accessToken = response.accessToken;
+        final refreshToken = response.refreshToken;
+        print('========== OTP SUCCESS ==========');
+        print('Access Token: ${accessToken.isNotEmpty}');
+        print('User: ${response.user}');
+        print('Status: ${response.user.verificationStatus}');
+        print('Status value: ${response.user.verificationStatus.value}');
+        print(
+          'Is Auto Verified: ${response.user.verificationStatus.isAutoVerified}',
+        );
+        print('Is Verified: ${response.user.verificationStatus.isVerified}');
+        print('=================================');
+
+        await _tokenStorage.saveTokens(accessToken, refreshToken);
         _apiService.setBearerToken(accessToken);
 
-        return AuthAuthenticated(accessToken: accessToken, user: response.user);
-      } catch (e) {
+        final authenticated = AuthAuthenticated(
+          accessToken: accessToken,
+          user: response.user,
+        );
+
+        print('Setting AuthAuthenticated');
+        print('Auth status: ${authenticated.user.verificationStatus}');
+
+        return authenticated;
+      } catch (e, stack) {
+        print('OTP ERROR: $e');
+        print(stack);
+
         final prev = state.asData?.value;
-        if (prev is AuthOtpSent) return prev;
+
+        if (prev is AuthOtpSent) {
+          return prev;
+        }
+
         return AuthUnauthenticated(message: e.toString());
       }
     });
+
+    print('FINAL AUTH STATE: ${state.asData?.value.runtimeType}');
   }
 
   Future<void> logout() async {

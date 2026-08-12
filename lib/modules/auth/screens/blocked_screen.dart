@@ -1,5 +1,5 @@
-// modules/auth/screens/blocked_screen.dart
-
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
@@ -12,6 +12,8 @@ class BlockedScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = context.isDarkMode;
+
     return AuthStatusScaffold(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -51,18 +53,20 @@ class BlockedScreen extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(AppStyle.spaceLarge),
             decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.04),
+              color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.grey.withValues(alpha: 0.04),
               borderRadius: AppStyle.borderRadiusMedium,
             ),
             child: Column(
               children: [
                 _buildContactRow(
+                  context,
                   icon: Icons.email_outlined,
                   label: 'Email',
                   value: 'support@fluup.online',
                 ),
                 const Divider(height: AppStyle.spaceXLarge),
                 _buildContactRow(
+                  context,
                   icon: Icons.phone_outlined,
                   label: 'Phone',
                   value: '+91 1800-123-4567',
@@ -88,7 +92,7 @@ class BlockedScreen extends ConsumerWidget {
             child: Text(
               'Back to Login',
               style: AppStyle.label.copyWith(
-                color: const Color(0xFF98001F),
+                color: ColorName.primaryBrandRed,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -98,11 +102,14 @@ class BlockedScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContactRow({
+  Widget _buildContactRow(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
   }) {
+    final isDark = context.isDarkMode;
+
     return Row(
       children: [
         Icon(icon, size: 20, color: AppStyle.textSecondary),
@@ -120,7 +127,9 @@ class BlockedScreen extends ConsumerWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: AppStyle.titleSmall.copyWith(color: Colors.black87),
+                style: AppStyle.titleSmall.copyWith(
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
               ),
             ],
           ),
@@ -129,3 +138,4 @@ class BlockedScreen extends ConsumerWidget {
     );
   }
 }
+

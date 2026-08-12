@@ -28,8 +28,8 @@ class OrdersScreen extends StatelessWidget {
       const Center(child: Text('Orders Screen'));
 }
 
-class VendorProductsScreen extends StatelessWidget {
-  const VendorProductsScreen({super.key});
+class SellerProductsScreen extends StatelessWidget {
+  const SellerProductsScreen({super.key});
   @override
   Widget build(BuildContext context) =>
       const Center(child: Text('Products Screen'));
@@ -42,15 +42,15 @@ class AllCategoryScreen extends StatelessWidget {
       const Center(child: Text('Profile Screen'));
 }
 
-class VendorDashboardScreen extends StatelessWidget {
-  const VendorDashboardScreen({super.key});
+class SellerDashboardScreen extends StatelessWidget {
+  const SellerDashboardScreen({super.key});
   @override
   Widget build(BuildContext context) =>
       const Center(child: Text('Profile Screen'));
 }
 
-class VendorOrdersScreen extends StatelessWidget {
-  const VendorOrdersScreen({super.key});
+class SellerOrdersScreen extends StatelessWidget {
+  const SellerOrdersScreen({super.key});
   @override
   Widget build(BuildContext context) =>
       const Center(child: Text('Profile Screen'));
@@ -138,7 +138,7 @@ class NavigationConfig {
       iconPath: AppIcons.all,
       activeIconPath: AppIcons.all,
       route: AppRoutes.products,
-      screen: const VendorProductsScreen(),
+      screen: const SellerProductsScreen(),
       allowedUserTypes: [USER_TYPE_VENDOR],
     ),
     NavigationItem(

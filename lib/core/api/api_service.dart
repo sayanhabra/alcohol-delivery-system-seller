@@ -364,7 +364,7 @@ class ApiService {
   Future<BaseResponseModel> refreshToken(String refreshToken) async {
     return _handler.post(
       endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.authRefresh}',
-      data: {'refresh_token': refreshToken},
+      data: {'refreshToken': refreshToken},
       contentType: RequestContentType.json,
       fromJson: (json) => BaseResponseModel.fromJson(json),
       errorMessage: 'Failed to refresh token',
@@ -372,11 +372,12 @@ class ApiService {
   }
 
   /// POST /seller/auth/logout
-  Future<BaseResponseModel> logout() async {
+  Future logout() async {
     return _handler.post(
       endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.logout}',
       data: {},
       contentType: RequestContentType.json,
+      extra: {'skipAuth': false, 'skipRefresh': true},
       fromJson: (json) => BaseResponseModel.fromJson(json),
       errorMessage: 'Logout failed',
     );

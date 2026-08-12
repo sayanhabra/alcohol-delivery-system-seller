@@ -274,9 +274,12 @@
 
 import 'dart:async';
 import 'dart:convert';
+// import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
+// import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'api_endpoints.dart';
 
 /// Supported authentication types
@@ -370,6 +373,8 @@ class ApiClient {
   late Dio _dio;
   bool _isInitialized = false;
 
+  // late final CookieJar _cookieJar;
+
   static const String _defaultUsername = 'alba_admin';
   static const String _defaultPassword = 'Albat@432!';
 
@@ -400,29 +405,49 @@ class ApiClient {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        validateStatus: (status) => status != null && status < 500,
+        validateStatus: (status) {
+          return status != null && status >= 200 && status < 300;
+        },
       ),
     );
+    // _cookieJar = CookieJar();
+    // _dio.interceptors.add(CookieManager(_cookieJar));
 
     _setupInterceptors();
     _isInitialized = true;
   }
 
   void _setupInterceptors() {
-    // Auth + Auto-refresh interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          _applyAuth(options);
+          // Don't attach bearer token to refresh request.
+          if (options.extra['skipAuth'] != true) {
+            _applyAuth(options);
+          }
+
           return handler.next(options);
         },
-        onResponse: (response, handler) => handler.next(response),
+
+        onResponse: (response, handler) {
+          return handler.next(response);
+        },
+
         onError: (error, handler) async {
+          print('🔥 API ERROR');
+          print('URL: ${error.requestOptions.uri}');
+          print('STATUS: ${error.response?.statusCode}');
+
           if (error.response?.statusCode == 401) {
+            print('🔄 401 → START TOKEN REFRESH');
+
             await _handleTokenRefresh(error, handler);
-          } else {
-            handler.next(error);
+            return;
           }
+
+          print('❌ ${error.response?.statusCode} → NO REFRESH');
+
+          handler.next(error);
         },
       ),
     );
@@ -472,77 +497,230 @@ class ApiClient {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    // If the 401 came from the refresh endpoint itself → logout
+    // ============================================================
+    // NEVER refresh the refresh API itself
+    // ============================================================
+
     if (err.requestOptions.path.contains(ApiEndpoints.authRefresh)) {
+      print('❌ REFRESH API ITSELF RETURNED 401');
+
       _isRefreshing = false;
-      _refreshCompleter?.completeError('Refresh failed');
+
+      if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.completeError(Exception('Refresh token expired'));
+      }
+
       _refreshCompleter = null;
+
+      // THIS means refresh token is invalid/expired.
+      // Only here should logout happen.
       onUnauthorized?.call();
+
       handler.reject(err);
       return;
     }
 
-    // Another request is already refreshing — wait for it
+    // ============================================================
+    // Another request is already refreshing
+    // ============================================================
+
     if (_isRefreshing && _refreshCompleter != null) {
       try {
         await _refreshCompleter!.future;
-        // Retry with the new token
+
+        final newAccessToken = _authConfig.token;
+
+        if (newAccessToken == null || newAccessToken.isEmpty) {
+          handler.reject(err);
+          return;
+        }
+
         final opts = err.requestOptions;
-        opts.headers['Authorization'] = 'Bearer ${_authConfig.token}';
+
+        opts.headers['Authorization'] = 'Bearer $newAccessToken';
+
         final response = await _dio.fetch(opts);
+
+        // IMPORTANT:
+        // Whatever the retried API returns, pass it back.
+        // Do NOT logout here.
         handler.resolve(response);
-      } catch (_) {
-        handler.reject(err);
+      } catch (e) {
+        // Do NOT call onUnauthorized here.
+        //
+        // This could be:
+        // 400 validation error
+        // 403
+        // 404
+        // server error
+        //
+        // It does NOT mean refresh token expired.
+        handler.reject(e is DioException ? e : err);
       }
+
       return;
     }
 
-    // Start token refresh
+    // ============================================================
+    // START REFRESH
+    // ============================================================
+
     _isRefreshing = true;
     _refreshCompleter = Completer<void>();
 
     try {
-      // Call refresh endpoint — cookie is sent automatically by Dio
-      final response = await _dio.post(
-        '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.authRefresh}',
-        options: Options(
-          headers: {
-            // Strip stale Authorization; let the HTTP cookie handle auth
-            'Authorization': null,
-          },
-        ),
-      );
+      final prefs = await SharedPreferences.getInstance();
 
-      // Parse new token — adjust keys if your response shape differs
-      final data = response.data;
-      final newToken =
-          data?['response']?['accessToken'] ??
-          data?['accessToken'] ??
-          data?['access_token'] as String?;
+      final refreshToken = prefs.getString('refresh_token');
 
-      if (newToken == null || newToken.isEmpty) {
+      if (refreshToken == null || refreshToken.isEmpty) {
+        print('❌ REFRESH TOKEN NOT FOUND');
+
+        throw Exception('Refresh token not found');
+      }
+
+      print('🔄 REFRESH TOKEN FOUND');
+      print('🔄 Calling refresh API...');
+
+      // ==========================================================
+      // REFRESH API
+      // ==========================================================
+
+      Response refreshResponse;
+
+      try {
+        refreshResponse = await _dio.post(
+          '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.authRefresh}',
+          data: {'refreshToken': refreshToken},
+          options: Options(
+            headers: {'Authorization': null, 'Cookie': null},
+            extra: {'skipAuth': true, 'skipRefresh': true},
+          ),
+        );
+      } catch (e) {
+        // ========================================================
+        // REFRESH API FAILED
+        // ========================================================
+
+        print('❌ REFRESH API FAILED: $e');
+
+        // ONLY HERE logout is allowed.
+        onUnauthorized?.call();
+
+        rethrow;
+      }
+
+      // ==========================================================
+      // Check refresh response
+      // ==========================================================
+
+      final data = refreshResponse.data;
+
+      final newAccessToken = data?['response']?['accessToken'] as String?;
+
+      final newRefreshToken = data?['response']?['refreshToken'] as String?;
+
+      if (newAccessToken == null || newAccessToken.isEmpty) {
+        print('❌ REFRESH RESPONSE HAS NO ACCESS TOKEN');
+
+        // Refresh was unsuccessful.
+        onUnauthorized?.call();
+
         throw Exception('No access token in refresh response');
       }
 
-      // Update token and notify waiters
-      setBearerToken(newToken);
-      _refreshCompleter!.complete();
+      if (newRefreshToken == null || newRefreshToken.isEmpty) {
+        print('❌ REFRESH RESPONSE HAS NO REFRESH TOKEN');
 
-      // Retry the original failed request
+        // Refresh was unsuccessful.
+        onUnauthorized?.call();
+
+        throw Exception('No refresh token in refresh response');
+      }
+
+      print('✅ REFRESH API SUCCESS');
+      print('✅ New access token received');
+      print('✅ New refresh token received');
+
+      // ==========================================================
+      // SAVE BOTH TOKENS
+      // ==========================================================
+
+      await prefs.setString('access_token', newAccessToken);
+
+      await prefs.setString('refresh_token', newRefreshToken);
+
+      // ==========================================================
+      // UPDATE CURRENT AUTHORIZATION
+      // ==========================================================
+
+      setBearerToken(newAccessToken);
+
+      // ==========================================================
+      // Notify waiting requests
+      // ==========================================================
+
+      if (!_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.complete();
+      }
+
+      // ==========================================================
+      // RETRY ORIGINAL REQUEST
+      // ==========================================================
+
       final opts = err.requestOptions;
-      opts.headers['Authorization'] = 'Bearer $newToken';
-      final retryResponse = await _dio.fetch(opts);
-      handler.resolve(retryResponse);
+
+      opts.headers['Authorization'] = 'Bearer $newAccessToken';
+
+      print('🔁 RETRY ORIGINAL REQUEST');
+
+      try {
+        final retryResponse = await _dio.fetch(opts);
+
+        // ========================================================
+        // IMPORTANT
+        //
+        // The retry may return:
+        //
+        // 200 → success
+        // 400 → validation error
+        // 403 → permission error
+        // 404 → not found
+        //
+        // None of these should logout the user.
+        // ========================================================
+
+        handler.resolve(retryResponse);
+      } catch (retryError) {
+        print('❌ RETRIED API FAILED: $retryError');
+
+        // VERY IMPORTANT:
+        // Do NOT call onUnauthorized().
+        //
+        // The refresh already succeeded.
+        // This is an error from the original API.
+        handler.reject(retryError is DioException ? retryError : err);
+      }
     } catch (e) {
-      _refreshCompleter?.completeError(e);
-      onUnauthorized?.call();
-      handler.reject(err);
+      print('❌ TOKEN REFRESH FAILED: $e');
+
+      // DO NOT call onUnauthorized() here.
+      //
+      // Why?
+      // The refresh API failure is already handled above.
+      //
+      // Calling it here again can cause duplicate logout.
+
+      if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.completeError(e);
+      }
+
+      handler.reject(e is DioException ? e : err);
     } finally {
       _isRefreshing = false;
       _refreshCompleter = null;
     }
   }
-
   // ==================== AUTH CONFIGURATION ====================
 
   void setAuth(AuthConfig config) => _authConfig = config;
@@ -564,6 +742,10 @@ class ApiClient {
     username: _defaultUsername,
     password: _defaultPassword,
   );
+
+  bool _shouldSkipTokenRefresh(RequestOptions options) {
+    return options.extra['skipRefresh'] == true;
+  }
 
   // ==================== GETTERS ====================
 

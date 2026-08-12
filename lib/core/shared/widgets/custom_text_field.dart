@@ -1,3 +1,4 @@
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -30,6 +31,8 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Column(
@@ -37,10 +40,10 @@ class CustomTextField extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: isDark ? Colors.white70 : Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
@@ -52,9 +55,14 @@ class CustomTextField extends StatelessWidget {
             onTap: onTap,
             validator: validator,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
+            ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(color: Colors.black38),
+              hintStyle: TextStyle(
+                color: isDark ? Colors.white30 : Colors.black38,
+              ),
               prefixIcon: prefixIcon,
               suffixIcon: isPassword
                   ? IconButton(
@@ -62,7 +70,7 @@ class CustomTextField extends StatelessWidget {
                         obscureText
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: Colors.black45,
+                        color: isDark ? Colors.white54 : Colors.black45,
                       ),
                       onPressed: onToggleVisibility,
                     )
@@ -70,15 +78,22 @@ class CustomTextField extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(
+                  color: isDark ? Colors.white24 : ColorName.textFieldBorderLight,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(
+                  color: isDark ? Colors.white24 : ColorName.textFieldBorderLight,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF98001F)),
+                borderSide: BorderSide(
+                  color: isDark ? ColorName.secondary : ColorName.primaryBrandRed,
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -86,7 +101,7 @@ class CustomTextField extends StatelessWidget {
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.red),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
             ),
           ),

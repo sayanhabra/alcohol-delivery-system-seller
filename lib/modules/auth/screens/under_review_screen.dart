@@ -1,5 +1,5 @@
-// modules/auth/screens/under_review_screen.dart
-
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/modules/auth/screens/auth_status_scaffold.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,8 @@ class UnderReviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return AuthStatusScaffold(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -61,7 +63,7 @@ class UnderReviewScreen extends StatelessWidget {
                 Text(
                   'You will be notified once approved',
                   style: AppStyle.bodySmall.copyWith(
-                    color: Colors.orange.shade800,
+                    color: isDark ? Colors.orangeAccent : Colors.orange.shade800,
                   ),
                 ),
               ],
@@ -75,7 +77,7 @@ class UnderReviewScreen extends StatelessWidget {
             child: Text(
               'Check Status',
               style: AppStyle.label.copyWith(
-                color: const Color(0xFF98001F),
+                color: ColorName.primaryBrandRed,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -85,3 +87,4 @@ class UnderReviewScreen extends StatelessWidget {
     );
   }
 }
+

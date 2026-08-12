@@ -467,6 +467,8 @@
 // modules/auth/screens/login_screen.dart
 
 import 'dart:async';
+import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
@@ -721,9 +723,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authAsync = ref.watch(authNotifierProvider);
     final isLoading = authAsync.isLoading;
+    final isDark = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? ColorName.primaryBackgroundDark : Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -763,10 +766,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             if (isLoading)
               Container(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: (isDark ? ColorName.primaryBackgroundDark : Colors.white).withValues(alpha: 0.7),
                 child: const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(Color(0xFF98001F)),
+                    valueColor: AlwaysStoppedAnimation(ColorName.primaryBrandRed),
                   ),
                 ),
               ),
@@ -781,6 +784,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   // ============================================================
 
   Widget _buildBanner() {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
     return Stack(
       children: [
         SizedBox(
@@ -801,9 +805,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.white.withValues(alpha: 0.1),
-                Colors.white.withValues(alpha: 0.6),
-                Colors.white,
+                surfaceColor.withValues(alpha: 0.1),
+                surfaceColor.withValues(alpha: 0.6),
+                surfaceColor,
               ],
               stops: const [0.0, 0.5, 0.8, 1.0],
             ),
@@ -894,7 +898,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                border: Border.all(color: AppStyle.borderColor, width: 1.5),
+                border: Border.all(color: context.customColors.border, width: 1.5),
                 borderRadius: AppStyle.borderRadiusMedium,
                 color: Theme.of(context).inputDecorationTheme.fillColor,
               ),
@@ -915,6 +919,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   _clearError();
                   setState(() {});
                 },
+                style: TextStyle(
+                  color: context.isDarkMode ? Colors.white : Colors.black87,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Enter mobile number',
                   prefixText: '+91  ',
@@ -922,7 +929,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     color: Theme.of(context).textTheme.titleMedium?.color,
                   ),
                   hintStyle: AppStyle.bodyMedium.copyWith(
-                    color: const Color(0xFFBBBBBB),
+                    color: ColorName.lightGreyBorder,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppStyle.spaceLarge,
@@ -930,15 +937,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: AppStyle.borderRadiusMedium,
-                    borderSide: const BorderSide(
-                      color: AppStyle.borderColor,
+                    borderSide: BorderSide(
+                      color: context.customColors.border,
                       width: 1.5,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: AppStyle.borderRadiusMedium,
-                    borderSide: const BorderSide(
-                      color: Color(0xFF98001F),
+                    borderSide: BorderSide(
+                      color: context.isDarkMode ? ColorName.secondary : ColorName.primaryBrandRed,
                       width: 2,
                     ),
                   ),
@@ -993,10 +1000,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _clearError();
             setState(() {});
           },
+          style: TextStyle(
+            color: context.isDarkMode ? Colors.white : Colors.black87,
+          ),
           decoration: InputDecoration(
             hintText: 'Enter your full name',
             hintStyle: AppStyle.bodyMedium.copyWith(
-              color: const Color(0xFFBBBBBB),
+              color: ColorName.lightGreyBorder,
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppStyle.spaceLarge,
@@ -1004,14 +1014,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: AppStyle.borderRadiusMedium,
-              borderSide: const BorderSide(
-                color: AppStyle.borderColor,
+              borderSide: BorderSide(
+                color: context.customColors.border,
                 width: 1.5,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: AppStyle.borderRadiusMedium,
-              borderSide: const BorderSide(color: Color(0xFF98001F), width: 2),
+              borderSide: BorderSide(
+                color: context.isDarkMode ? ColorName.secondary : ColorName.primaryBrandRed,
+                width: 2,
+              ),
             ),
           ),
         ),
@@ -1030,7 +1043,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Text(
             'Change mobile number',
             style: AppStyle.label.copyWith(
-              color: const Color(0xFF98001F),
+              color: ColorName.primaryBrandRed,
               decoration: TextDecoration.underline,
             ),
           ),
@@ -1094,7 +1107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Text(
                 'Change mobile number',
                 style: AppStyle.label.copyWith(
-                  color: const Color(0xFF98001F),
+                  color: ColorName.primaryBrandRed,
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -1139,14 +1152,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           contentPadding: EdgeInsets.zero,
           enabledBorder: OutlineInputBorder(
             borderRadius: AppStyle.borderRadiusMedium,
-            borderSide: const BorderSide(
-              color: AppStyle.borderColor,
+            borderSide: BorderSide(
+              color: context.customColors.border,
               width: 1.5,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppStyle.borderRadiusMedium,
-            borderSide: const BorderSide(color: Color(0xFF98001F), width: 2.5),
+            borderSide: BorderSide(
+              color: context.isDarkMode ? ColorName.secondary : ColorName.primaryBrandRed,
+              width: 2.5,
+            ),
           ),
         ),
       ),
@@ -1165,7 +1181,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Text(
         'Resend OTP',
         style: AppStyle.label.copyWith(
-          color: const Color(0xFF98001F),
+          color: ColorName.primaryBrandRed,
           fontWeight: FontWeight.w600,
         ),
       ),

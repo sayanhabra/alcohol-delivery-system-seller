@@ -122,13 +122,15 @@ class SecondaryButton extends StatelessWidget {
 
     final isLoading = state == ButtonState.loading;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AppButton(
       horizontalMargin: horizontalMargin,
       minWidth: double.infinity,
       radius: 100,
       height: height,
       color: ColorName.primarybackground,
-      disabledColor: const Color(0xFFE2E2E3),
+      disabledColor: isDark ? ColorName.inputFillDark : ColorName.disabledGray,
       isLoading: isLoading,
       onPressed: isDisabled ? null : onPressed,
       child: Row(
@@ -141,7 +143,9 @@ class SecondaryButton extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              color: isDisabled ? Colors.black54 : Colors.white,
+              color: isDisabled
+                  ? (isDark ? Colors.white30 : Colors.black54)
+                  : Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -295,24 +299,27 @@ class GreyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fgColor = isDark ? Colors.white70 : ColorName.grayButtonText;
+
     return AppButton(
       onPressed: onPressed,
       horizontalMargin: horizontalMargin,
       minWidth: double.infinity,
       radius: 100,
       height: height,
-      color: const Color(0xFFE2E2E3),
+      color: isDark ? ColorName.inputFillDark : ColorName.disabledGray,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 19, color: const Color(0xFF1E2B29)),
+            Icon(icon, size: 19, color: fgColor),
             const SizedBox(width: 8),
           ],
           Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFF1E2B29),
+            style: TextStyle(
+              color: fgColor,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
@@ -358,6 +365,8 @@ class BorderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AppButton(
       onPressed: onPressed,
       minWidth: width,
@@ -378,8 +387,8 @@ class BorderButton extends StatelessWidget {
                 text ?? 'Button',
                 style:
                     textStyle ??
-                    const TextStyle(
-                      color: ColorName.black,
+                    TextStyle(
+                      color: isDark ? Colors.white70 : ColorName.black,
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                     ),

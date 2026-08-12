@@ -1,5 +1,6 @@
 // core/shared/widgets/auth_status_scaffold.dart
 
+import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +16,10 @@ class AuthStatusScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? ColorName.primaryBackgroundDark : Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -52,6 +55,8 @@ class AuthStatusScaffold extends StatelessWidget {
   }
 
   Widget _buildBanner(BuildContext context) {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+
     return Stack(
       children: [
         SizedBox(
@@ -72,9 +77,9 @@ class AuthStatusScaffold extends StatelessWidget {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.white.withValues(alpha: 0.1),
-                Colors.white.withValues(alpha: 0.6),
-                Colors.white,
+                surfaceColor.withValues(alpha: 0.1),
+                surfaceColor.withValues(alpha: 0.6),
+                surfaceColor,
               ],
               stops: const [0.0, 0.5, 0.8, 1.0],
             ),
@@ -84,3 +89,4 @@ class AuthStatusScaffold extends StatelessWidget {
     );
   }
 }
+

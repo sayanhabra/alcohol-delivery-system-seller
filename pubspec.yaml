@@ -50,6 +50,9 @@ dependencies:
   flutter_svg: ^2.3.0
   image_picker: ^1.2.3
   intl: ^0.20.3
+  lottie: ^3.5.1
+  # cookie_jar: ^4.0.9
+  # dio_cookie_manager: ^3.5.0
 
 dependency_overrides:
   path_provider_android: 2.2.19
@@ -80,6 +83,7 @@ flutter:
     - assets/png/
     - assets/svg/
     - assets/jpg/
+    - assets/animation/
 
   fonts:
     - family: Inter
