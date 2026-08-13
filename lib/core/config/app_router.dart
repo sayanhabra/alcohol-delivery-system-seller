@@ -1,7 +1,6 @@
 import 'package:adm_seller/core/navigation/main_navigation_shell.dart';
 import 'package:adm_seller/core/navigation/navigation_config.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
-import 'package:adm_seller/modules/auth/screens/auth_loading_screen.dart';
 import 'package:adm_seller/modules/auth/screens/startup_screen.dart';
 import 'package:adm_seller/modules/dashboard/screens/home_screen.dart';
 import 'package:adm_seller/modules/dashboard/screens/profile_screen.dart';
@@ -21,7 +20,6 @@ class AppRoutes {
   static const String startup = '/startup';
   static const String splash = '/splash';
   static const String login = '/login';
-  static const String loading = '/loading'; // ← NEW
   static const String profileSetup = '/auth/profile-setup';
   static const String verificationSubmission = '/auth/verification-submission';
   static const String underReview = '/auth/under-review';
@@ -33,7 +31,6 @@ class AppRoutes {
   static const String allCategory = '/allcategory';
   static const String sellerDashboard = '/seller/dashboard';
   static const String sellerOrders = '/seller/orders';
-  // static const String vendorProducts = '/vendor/products';
   static const String riderDashboard = '/rider/dashboard';
   static const String riderDeliveries = '/rider/deliveries';
   static const String riderEarnings = '/rider/earnings';
@@ -178,10 +175,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: AppRoutes.splash, builder: (_, __) => const SplashScreen()),
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
-      GoRoute(
-        path: AppRoutes.loading, // ← NEW
-        builder: (_, __) => const AuthLoadingScreen(),
-      ),
 
       // Post-auth status screens
       GoRoute(

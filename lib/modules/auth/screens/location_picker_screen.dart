@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lottie/lottie.dart';
 
 class LocationPickerResult {
   final double latitude;
@@ -464,9 +465,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 onChanged: _onSearchChanged,
                 textInputAction: TextInputAction.search,
                 onSubmitted: _searchLocation,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Search location',
                   hintStyle: TextStyle(
@@ -530,7 +529,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark ? Colors.black38 : Colors.black.withValues(alpha: 0.15),
+                    color: isDark
+                        ? Colors.black38
+                        : Colors.black.withValues(alpha: 0.15),
                     blurRadius: 10,
                   ),
                 ],
@@ -538,7 +539,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, color: ColorName.primaryBrandRed),
+                  const Icon(
+                    Icons.location_on,
+                    color: ColorName.primaryBrandRed,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -568,10 +572,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               foregroundColor: ColorName.primaryBrandRed,
               onPressed: _goToCurrentLocation,
               child: _isLoadingLocation
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                  ? Lottie.asset(
+                      'assets/animation/alcohol.json',
+                      height: 200,
+                      width: 200,
                     )
                   : const Icon(Icons.my_location),
             ),

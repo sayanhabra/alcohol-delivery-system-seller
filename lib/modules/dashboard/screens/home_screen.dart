@@ -136,9 +136,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Center(
           child: Text(
             "Home",
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-            ),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
           ),
         ),
       ),

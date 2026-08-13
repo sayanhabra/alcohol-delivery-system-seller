@@ -1,11 +1,13 @@
 // modules/dashboard/screens/dashboard_screen.dart
 
+import 'package:adm_seller/core/config/app_icons.dart';
 import 'package:adm_seller/core/shared/helpers/location_helper.dart';
 // import 'package:adm_seller/features/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lottie/lottie.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -80,15 +82,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
 
     if (!_isLocationReady) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Checking location...', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
+      return Center(
+        child: Lottie.asset(AppIcons.loading, height: 200, width: 200),
       );
     }
 

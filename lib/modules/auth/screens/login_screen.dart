@@ -467,6 +467,7 @@
 // modules/auth/screens/login_screen.dart
 
 import 'dart:async';
+import 'package:adm_seller/core/config/app_icons.dart';
 import 'package:adm_seller/core/config/app_theme.dart';
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
@@ -475,6 +476,7 @@ import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -766,10 +768,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             if (isLoading)
               Container(
-                color: (isDark ? ColorName.primaryBackgroundDark : Colors.white).withValues(alpha: 0.7),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(ColorName.primaryBrandRed),
+                color: (isDark ? ColorName.primaryBackgroundDark : Colors.white)
+                    .withValues(alpha: 0.7),
+                child: Center(
+                  child: Lottie.asset(
+                    AppIcons.loading,
+                    height: 200,
+                    width: 200,
                   ),
                 ),
               ),
@@ -898,7 +903,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                border: Border.all(color: context.customColors.border, width: 1.5),
+                border: Border.all(
+                  color: context.customColors.border,
+                  width: 1.5,
+                ),
                 borderRadius: AppStyle.borderRadiusMedium,
                 color: Theme.of(context).inputDecorationTheme.fillColor,
               ),
@@ -945,7 +953,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: AppStyle.borderRadiusMedium,
                     borderSide: BorderSide(
-                      color: context.isDarkMode ? ColorName.secondary : ColorName.primaryBrandRed,
+                      color: context.isDarkMode
+                          ? ColorName.secondary
+                          : ColorName.primaryBrandRed,
                       width: 2,
                     ),
                   ),
@@ -1022,7 +1032,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             focusedBorder: OutlineInputBorder(
               borderRadius: AppStyle.borderRadiusMedium,
               borderSide: BorderSide(
-                color: context.isDarkMode ? ColorName.secondary : ColorName.primaryBrandRed,
+                color: context.isDarkMode
+                    ? ColorName.secondary
+                    : ColorName.primaryBrandRed,
                 width: 2,
               ),
             ),
@@ -1160,7 +1172,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: AppStyle.borderRadiusMedium,
             borderSide: BorderSide(
-              color: context.isDarkMode ? ColorName.secondary : ColorName.primaryBrandRed,
+              color: context.isDarkMode
+                  ? ColorName.secondary
+                  : ColorName.primaryBrandRed,
               width: 2.5,
             ),
           ),
