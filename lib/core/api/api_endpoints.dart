@@ -16,4 +16,12 @@ class ApiEndpoints {
   static const String profileImage = '/auth/profile-image';
   static const String profileDocs = '/auth/profile/documents';
   static const String storeStatus = '/auth/stores-status';
+
+  // ================= INVENTORY =================
+
+  static const String inventoryCategories = '/inventory/categories';
+  static const String inventoryBrands = '/inventory/brands';
+  static const String inventoryProducts = '/inventory/products';
+  static const String inventoryProductDetails = '/inventory/products';
+  static const String inventorySubmit = '/inventory';
 }

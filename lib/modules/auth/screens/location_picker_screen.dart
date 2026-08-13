@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:adm_seller/core/config/app_theme.dart';
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';

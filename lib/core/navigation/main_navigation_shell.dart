@@ -1,5 +1,3 @@
-// core/navigation/main_navigation_shell.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'bottom_nav_bar.dart';

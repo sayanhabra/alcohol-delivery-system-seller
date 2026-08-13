@@ -90,6 +90,7 @@ class LocationHelper {
           ).timeout(timeout);
 
           // If we got a position, break the loop
+          // ignore: unnecessary_null_comparison
           if (position != null) {
             break;
           }

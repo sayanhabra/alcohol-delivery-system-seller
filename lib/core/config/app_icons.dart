@@ -12,6 +12,9 @@ class AppIcons {
   static const String fav = '$_svgPath/fav.svg';
   static const String home = '$_svgPath/home.svg';
   static const String profile = '$_svgPath/profile.svg';
+  static const String inventory = '$_svgPath/inventory.svg';
+  static const String wallet = '$_svgPath/wallet.svg';
+  static const String wallet2 = '$_svgPath/wallet2.svg';
 
   // --- PNG Icons / Images ---
   static const String aadhaarPng = '$_pngPath/ic_aadhaar.png';

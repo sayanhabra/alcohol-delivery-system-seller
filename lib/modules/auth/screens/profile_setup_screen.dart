@@ -48,17 +48,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   // ─── Validation ───
   bool get _isFormValid {
     return _storeName.text.trim().length >= 2 &&
-        // _licenseNumber.text.trim().isNotEmpty &&
-        // _licenseHolderName.text.trim().isNotEmpty &&
-        // _licenseType.text.trim().isNotEmpty &&
-        // _licenseExpiryDate.text.trim().isNotEmpty &&
-        // _gstin.text.trim().length == 15 &&
-        // _panNumber.text.trim().length == 10 &&
-        // _addressLine1.text.trim().isNotEmpty &&
-        // _city.text.trim().isNotEmpty &&
-        // _state.text.trim().isNotEmpty &&
-        // _pincode.text.trim().length == 6 &&
-        // double.tryParse(_latitude.text.trim()) != null &&
+        _licenseNumber.text.trim().isNotEmpty &&
+        _licenseHolderName.text.trim().isNotEmpty &&
+        _licenseType.text.trim().isNotEmpty &&
+        _licenseExpiryDate.text.trim().isNotEmpty &&
+        _gstin.text.trim().length == 15 &&
+        _panNumber.text.trim().length == 10 &&
+        _addressLine1.text.trim().isNotEmpty &&
+        _city.text.trim().isNotEmpty &&
+        _state.text.trim().isNotEmpty &&
+        _pincode.text.trim().length == 6 &&
+        double.tryParse(_latitude.text.trim()) != null &&
         double.tryParse(_longitude.text.trim()) != null;
   }
 
@@ -627,7 +627,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(BuildContext context, {required String hint}) {
+  InputDecoration _inputDecoration(
+    BuildContext context, {
+    required String hint,
+  }) {
     final isDark = context.isDarkMode;
     return InputDecoration(
       hintText: hint,

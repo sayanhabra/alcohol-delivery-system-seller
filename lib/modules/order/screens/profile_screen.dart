@@ -1,15 +1,14 @@
 // modules/dashboard/screens/profile_screen.dart
 
 import 'package:adm_seller/core/config/app_theme.dart';
+import 'package:adm_seller/core/shared/const/seller_status_enum.dart';
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/buttons.dart';
-import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
 import 'package:adm_seller/modules/auth/models/user_model.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -21,7 +20,9 @@ class ProfileScreen extends ConsumerWidget {
     final isDark = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? ColorName.primaryBackgroundDark : ColorName.primaryBackgroundLight,
+      backgroundColor: isDark
+          ? ColorName.primaryBackgroundDark
+          : ColorName.primaryBackgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppStyle.spaceLarge),
@@ -172,111 +173,127 @@ class _StatusBanner extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return switch (status) {
       SellerStatus.draft => _BannerConfig(
-          title: 'Complete Your Profile',
-          subtitle:
-              'Your profile is still in draft. Please complete all required information and submit your application.',
-          icon: Icons.edit_note_rounded,
-          bgColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
-          borderColor: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
-          iconColor: isDark ? Colors.white70 : Colors.grey.shade700,
-          textColor: isDark ? Colors.white : Colors.grey.shade800,
-          subtitleColor: isDark ? Colors.white70 : Colors.grey.shade600,
-          actionLabel: 'Complete Profile →',
-          onAction: () {
-            // Navigate to profile completion
-          },
-        ),
+        title: 'Complete Your Profile',
+        subtitle:
+            'Your profile is still in draft. Please complete all required information and submit your application.',
+        icon: Icons.edit_note_rounded,
+        bgColor: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey.withValues(alpha: 0.08),
+        borderColor: isDark
+            ? Colors.white24
+            : Colors.grey.withValues(alpha: 0.3),
+        iconColor: isDark ? Colors.white70 : Colors.grey.shade700,
+        textColor: isDark ? Colors.white : Colors.grey.shade800,
+        subtitleColor: isDark ? Colors.white70 : Colors.grey.shade600,
+        actionLabel: 'Complete Profile →',
+        onAction: () {
+          // Navigate to profile completion
+        },
+      ),
 
       SellerStatus.pendingApproval => _BannerConfig(
-          title: 'Pending Approval',
-          subtitle:
-              'Your application has been submitted and is waiting for approval.',
-          icon: Icons.hourglass_top_rounded,
-          bgColor: Colors.orange.withValues(alpha: 0.08),
-          borderColor: Colors.orange.withValues(alpha: 0.3),
-          iconColor: Colors.orange,
-          textColor: isDark ? Colors.orangeAccent : Colors.orange.shade900,
-          subtitleColor: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
-        ),
+        title: 'Pending Approval',
+        subtitle:
+            'Your application has been submitted and is waiting for approval.',
+        icon: Icons.hourglass_top_rounded,
+        bgColor: Colors.orange.withValues(alpha: 0.08),
+        borderColor: Colors.orange.withValues(alpha: 0.3),
+        iconColor: Colors.orange,
+        textColor: isDark ? Colors.orangeAccent : Colors.orange.shade900,
+        subtitleColor: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
+      ),
 
       SellerStatus.autoVerified => _BannerConfig(
-          title: 'Automatically Verified',
-          subtitle:
-              'Your seller account has been automatically verified successfully.',
-          icon: Icons.verified_rounded,
-          bgColor: Colors.green.withValues(alpha: 0.08),
-          borderColor: Colors.green.withValues(alpha: 0.3),
-          iconColor: Colors.green,
-          textColor: isDark ? Colors.greenAccent : Colors.green.shade900,
-          subtitleColor: isDark ? Colors.green.shade200 : Colors.green.shade700,
-        ),
+        title: 'Automatically Verified',
+        subtitle:
+            'Your seller account has been automatically verified successfully.',
+        icon: Icons.verified_rounded,
+        bgColor: Colors.green.withValues(alpha: 0.08),
+        borderColor: Colors.green.withValues(alpha: 0.3),
+        iconColor: Colors.green,
+        textColor: isDark ? Colors.greenAccent : Colors.green.shade900,
+        subtitleColor: isDark ? Colors.green.shade200 : Colors.green.shade700,
+      ),
 
       SellerStatus.manualReviewRequired => _BannerConfig(
-          title: 'Account Under Review',
-          subtitle:
-              'Our team is reviewing your application. You will be notified once the review is complete.',
-          icon: Icons.visibility_rounded,
-          bgColor: Colors.orange.withValues(alpha: 0.08),
-          borderColor: Colors.orange.withValues(alpha: 0.3),
-          iconColor: Colors.orange,
-          textColor: isDark ? Colors.orangeAccent : Colors.orange.shade900,
-          subtitleColor: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
-        ),
+        title: 'Account Under Review',
+        subtitle:
+            'Our team is reviewing your application. You will be notified once the review is complete.',
+        icon: Icons.visibility_rounded,
+        bgColor: Colors.orange.withValues(alpha: 0.08),
+        borderColor: Colors.orange.withValues(alpha: 0.3),
+        iconColor: Colors.orange,
+        textColor: isDark ? Colors.orangeAccent : Colors.orange.shade900,
+        subtitleColor: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
+      ),
 
       SellerStatus.verified => _BannerConfig(
-          title: 'Account Verified',
-          subtitle: 'Your seller account has been verified successfully.',
-          icon: Icons.verified_rounded,
-          bgColor: Colors.green.withValues(alpha: 0.08),
-          borderColor: Colors.green.withValues(alpha: 0.3),
-          iconColor: Colors.green,
-          textColor: isDark ? Colors.greenAccent : Colors.green.shade900,
-          subtitleColor: isDark ? Colors.green.shade200 : Colors.green.shade700,
-        ),
+        title: 'Account Verified',
+        subtitle: 'Your seller account has been verified successfully.',
+        icon: Icons.verified_rounded,
+        bgColor: Colors.green.withValues(alpha: 0.08),
+        borderColor: Colors.green.withValues(alpha: 0.3),
+        iconColor: Colors.green,
+        textColor: isDark ? Colors.greenAccent : Colors.green.shade900,
+        subtitleColor: isDark ? Colors.green.shade200 : Colors.green.shade700,
+      ),
 
       SellerStatus.rejected => _BannerConfig(
-          title: 'Verification Rejected',
-          subtitle:
-              'Your verification was rejected. Please check the reason and re-submit your documents.',
-          icon: Icons.cancel_outlined,
-          bgColor: isDark ? Colors.redAccent.withValues(alpha: 0.08) : ColorName.primaryBrandRed.withValues(alpha: 0.06),
-          borderColor: isDark ? Colors.redAccent.withValues(alpha: 0.3) : ColorName.primaryBrandRed.withValues(alpha: 0.2),
-          iconColor: isDark ? Colors.redAccent : ColorName.primaryBrandRed,
-          textColor: isDark ? Colors.redAccent : ColorName.primaryBrandRed,
-          subtitleColor: isDark ? Colors.red.shade200 : Colors.red.shade700,
-          actionLabel: 'Re-upload Documents →',
-          onAction: () {
-            // Navigate to verification submission
-          },
-        ),
+        title: 'Verification Rejected',
+        subtitle:
+            'Your verification was rejected. Please check the reason and re-submit your documents.',
+        icon: Icons.cancel_outlined,
+        bgColor: isDark
+            ? Colors.redAccent.withValues(alpha: 0.08)
+            : ColorName.primaryBrandRed.withValues(alpha: 0.06),
+        borderColor: isDark
+            ? Colors.redAccent.withValues(alpha: 0.3)
+            : ColorName.primaryBrandRed.withValues(alpha: 0.2),
+        iconColor: isDark ? Colors.redAccent : ColorName.primaryBrandRed,
+        textColor: isDark ? Colors.redAccent : ColorName.primaryBrandRed,
+        subtitleColor: isDark ? Colors.red.shade200 : Colors.red.shade700,
+        actionLabel: 'Re-upload Documents →',
+        onAction: () {
+          // Navigate to verification submission
+        },
+      ),
 
       SellerStatus.suspended => _BannerConfig(
-          title: 'Account Suspended',
-          subtitle:
-              'Your seller account has been suspended. Please contact support for assistance.',
-          icon: Icons.block_flipped,
-          bgColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
-          borderColor: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
-          iconColor: isDark ? Colors.white70 : Colors.grey.shade700,
-          textColor: isDark ? Colors.white : Colors.grey.shade800,
-          subtitleColor: isDark ? Colors.white70 : Colors.grey.shade600,
-          actionLabel: 'Contact Support',
-          onAction: () {
-            // Open support
-          },
-        ),
+        title: 'Account Suspended',
+        subtitle:
+            'Your seller account has been suspended. Please contact support for assistance.',
+        icon: Icons.block_flipped,
+        bgColor: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey.withValues(alpha: 0.08),
+        borderColor: isDark
+            ? Colors.white24
+            : Colors.grey.withValues(alpha: 0.3),
+        iconColor: isDark ? Colors.white70 : Colors.grey.shade700,
+        textColor: isDark ? Colors.white : Colors.grey.shade800,
+        subtitleColor: isDark ? Colors.white70 : Colors.grey.shade600,
+        actionLabel: 'Contact Support',
+        onAction: () {
+          // Open support
+        },
+      ),
 
       SellerStatus.unknown => _BannerConfig(
-          title: 'Unknown Status',
-          subtitle:
-              'We could not determine the current status of your seller account.',
-          icon: Icons.help_outline,
-          bgColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
-          borderColor: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3),
-          iconColor: isDark ? Colors.white70 : Colors.grey,
-          textColor: isDark ? Colors.white : Colors.black87,
-          subtitleColor: isDark ? Colors.white70 : Colors.grey,
-        ),
+        title: 'Unknown Status',
+        subtitle:
+            'We could not determine the current status of your seller account.',
+        icon: Icons.help_outline,
+        bgColor: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey.withValues(alpha: 0.08),
+        borderColor: isDark
+            ? Colors.white24
+            : Colors.grey.withValues(alpha: 0.3),
+        iconColor: isDark ? Colors.white70 : Colors.grey,
+        textColor: isDark ? Colors.white : Colors.black87,
+        subtitleColor: isDark ? Colors.white70 : Colors.grey,
+      ),
     };
   }
 }
@@ -351,7 +368,9 @@ class _ProfileHeader extends StatelessWidget {
           Text(
             '+91 ${user?.phone ?? ''}',
             style: AppStyle.bodyMedium.copyWith(
-              color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.grey,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white54
+                  : Colors.grey,
             ),
           ),
         ],

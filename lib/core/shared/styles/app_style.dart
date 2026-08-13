@@ -346,7 +346,7 @@ class AppStyle {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryColor, secondaryColor],
+    colors: [Color(0xFFB83A4A), Color(0xFF7D021E)],
   );
 
   // ============================================================

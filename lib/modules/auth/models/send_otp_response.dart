@@ -1,6 +1,4 @@
-// features/auth/models/send_otp_response.dart
-
-import 'next_step_enum.dart';
+import 'package:adm_seller/core/shared/const/next_step_enum.dart';
 
 class SendOtpResponseData {
   final NextStep nextStep;
@@ -28,7 +26,9 @@ class SendOtpResponseData {
     if (val == null) return null;
     if (val is int) return val;
     if (val is double) return val.toInt();
-    if (val is String) return int.tryParse(val) ?? double.tryParse(val)?.toInt();
+    if (val is String) {
+      return int.tryParse(val) ?? double.tryParse(val)?.toInt();
+    }
     return null;
   }
 

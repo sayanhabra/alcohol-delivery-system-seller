@@ -157,6 +157,66 @@ class ApiService {
       errorMessage: 'Failed to toggle store status',
     );
   }
+
+  // ==================== INVENTORY ====================
+
+  Future<BaseResponseModel> searchInventoryCategories(String search) async {
+    return _handler.get(
+      endpoint:
+          '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryCategories}',
+      queryParameters: {'search': search},
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to search categories',
+    );
+  }
+
+  Future<BaseResponseModel> getInventoryBrands({
+    required int categoryId,
+  }) async {
+    return _handler.get(
+      endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryBrands}',
+      queryParameters: {'category_id': categoryId},
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to load brands',
+    );
+  }
+
+  Future<BaseResponseModel> getInventoryProducts({
+    required int brandId,
+    String search = '',
+  }) async {
+    return _handler.get(
+      endpoint:
+          '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryProducts}',
+      queryParameters: {
+        'brand_id': brandId,
+        if (search.isNotEmpty) 'search': search,
+      },
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to load products',
+    );
+  }
+
+  Future<BaseResponseModel> getInventoryProductDetails({
+    required int productId,
+  }) async {
+    return _handler.get(
+      endpoint:
+          '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryProductDetails}/$productId',
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to load product details',
+    );
+  }
+
+  Future<BaseResponseModel> submitInventory(Map<String, dynamic> data) async {
+    return _handler.post(
+      endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventorySubmit}',
+      data: data,
+      contentType: RequestContentType.json,
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to add inventory',
+    );
+  }
 }
 
 class BaseResponseModel {

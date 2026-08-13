@@ -1,6 +1,4 @@
-import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
-
-// import 'verification_status_enum.dart';
+import 'package:adm_seller/core/shared/const/seller_status_enum.dart';
 
 class UserModel {
   final int id;

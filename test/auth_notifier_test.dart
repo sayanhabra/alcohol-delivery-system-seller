@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/models/check_phone_response.dart';
-import 'package:adm_seller/modules/auth/models/next_step_enum.dart';
+import 'package:adm_seller/core/shared/const/next_step_enum.dart';
 import 'package:adm_seller/core/api/api_service.dart';
 
 class MockApiService extends ApiService {
@@ -33,9 +33,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     mockApiService = MockApiService();
     container = ProviderContainer(
-      overrides: [
-        apiServiceProvider.overrideWithValue(mockApiService),
-      ],
+      overrides: [apiServiceProvider.overrideWithValue(mockApiService)],
     );
   });
 
@@ -48,7 +46,7 @@ void main() {
       mockApiService.mockCheckPhoneResponse = CheckPhoneResponse.fromJson({
         "statusCode": 200,
         "message": "Phone number not registered",
-        "response": {"nextStep": "ENTER_NAME"}
+        "response": {"nextStep": "ENTER_NAME"},
       });
 
       final notifier = container.read(authNotifierProvider.notifier);
@@ -72,8 +70,8 @@ void main() {
           "nextStep": "OTP_VERIFICATION",
           "challengeToken": "mock_token",
           "expiresInSeconds": 300,
-          "cooldownSeconds": 60
-        }
+          "cooldownSeconds": 60,
+        },
       });
 
       final notifier = container.read(authNotifierProvider.notifier);

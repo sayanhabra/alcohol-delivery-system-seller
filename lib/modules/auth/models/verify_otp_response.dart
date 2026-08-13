@@ -1,6 +1,6 @@
 // features/auth/models/verify_otp_response.dart
 
-import 'next_step_enum.dart';
+import '../../../core/shared/const/next_step_enum.dart';
 import 'user_model.dart';
 
 class VerifyOtpResponseData {

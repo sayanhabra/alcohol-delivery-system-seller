@@ -2,19 +2,18 @@ import 'package:adm_seller/core/navigation/main_navigation_shell.dart';
 import 'package:adm_seller/core/navigation/navigation_config.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/screens/startup_screen.dart';
-import 'package:adm_seller/modules/dashboard/screens/home_screen.dart';
-import 'package:adm_seller/modules/dashboard/screens/profile_screen.dart';
+import 'package:adm_seller/modules/inventory/screens/add_inventory_screen.dart';
+import 'package:adm_seller/modules/order/screens/home_screen.dart';
+import 'package:adm_seller/modules/order/screens/profile_screen.dart';
+import 'package:adm_seller/modules/wallet/screen/seller_wallet_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../modules/auth/screens/blocked_screen.dart';
 import '../../modules/auth/screens/login_screen.dart';
 import '../../modules/auth/screens/profile_setup_screen.dart';
-import '../../modules/auth/screens/rejected_retry_screen.dart';
 import '../../modules/auth/screens/splash_screen.dart';
-import '../../modules/auth/screens/under_review_screen.dart';
 import '../../modules/auth/screens/verification_submission_screen.dart';
-import '../../modules/dashboard/screens/dashboard_screen.dart';
+import '../../modules/order/screens/dashboard_screen.dart';
 
 class AppRoutes {
   static const String startup = '/startup';
@@ -22,20 +21,13 @@ class AppRoutes {
   static const String login = '/login';
   static const String profileSetup = '/auth/profile-setup';
   static const String verificationSubmission = '/auth/verification-submission';
-  static const String underReview = '/auth/under-review';
-  static const String rejectedRetry = '/auth/rejected';
-  static const String blocked = '/auth/blocked';
   static const String dashboard = '/dashboard';
   static const String home = '/home';
   static const String orders = '/orders';
   static const String allCategory = '/allcategory';
-  static const String sellerDashboard = '/seller/dashboard';
-  static const String sellerOrders = '/seller/orders';
-  static const String riderDashboard = '/rider/dashboard';
-  static const String riderDeliveries = '/rider/deliveries';
-  static const String riderEarnings = '/rider/earnings';
   static const String profile = '/profile';
   static const String products = '/products';
+  static const String wallets = '/wallets';
 }
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -49,7 +41,7 @@ class _RouterRefresh extends ChangeNotifier {
 }
 
 bool _isAppRoute(String path) {
-  return path == AppRoutes.dashboard ||
+  return path == AppRoutes.wallets ||
       path == AppRoutes.orders ||
       path == AppRoutes.products ||
       path == AppRoutes.profile;
@@ -119,7 +111,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Login / Splash / Loading
           // After authentication → Dashboard
-          return AppRoutes.dashboard;
+          return AppRoutes.orders;
         }
 
         // ----------------------------------------------------------
@@ -185,18 +177,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.verificationSubmission,
         builder: (_, __) => const VerificationSubmissionScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.underReview,
-        builder: (_, __) => const UnderReviewScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.rejectedRetry,
-        builder: (_, __) => const RejectedRetryScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.blocked,
-        builder: (_, __) => const BlockedScreen(),
-      ),
 
       // Main app shell
       ShellRoute(
@@ -215,20 +195,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const OrdersScreen(),
           ),
           GoRoute(
-            path: AppRoutes.allCategory,
-            builder: (_, __) => const AllCategoryScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.sellerDashboard,
-            builder: (_, __) => const SellerDashboardScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.sellerOrders,
-            builder: (_, __) => const SellerOrdersScreen(),
+            path: AppRoutes.wallets,
+            builder: (_, __) => const SellerWalletScreen(),
           ),
           GoRoute(
             path: AppRoutes.products,
-            builder: (_, __) => const SellerProductsScreen(),
+            builder: (_, __) => const AddInventoryScreen(),
           ),
           // GoRoute(
           //   path: AppRoutes.riderDashboard,
