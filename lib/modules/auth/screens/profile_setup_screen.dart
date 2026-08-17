@@ -584,6 +584,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization,
+          maxLength: maxLength,
+          onChanged: onChanged,
           style: TextStyle(
             color: context.isDarkMode ? Colors.white : Colors.black87,
           ),

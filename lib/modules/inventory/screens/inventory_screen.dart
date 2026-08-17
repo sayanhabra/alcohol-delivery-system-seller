@@ -1340,6 +1340,49 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
     return (mrp - discount).clamp(0, mrp);
   }
 
+  InputDecoration _inputDecoration({
+    String? hint,
+    String? label,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? errorText,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InputDecoration(
+      hintText: hint,
+      labelText: label,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      errorText: errorText,
+      filled: true,
+      fillColor: isDark
+          ? ColorName.inputFillDark
+          : ColorName.inputFillLight.withValues(alpha: 0.58),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? Colors.white24 : ColorName.inputBorderLight,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? ColorName.secondary : ColorName.primary,
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(inventoryProvider);
@@ -1347,9 +1390,12 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
     final isProcessing =
         state.isUpdating && state.processingInventoryId == widget.item.id;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: isDark ? context.customColors.cardBackground : Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
@@ -1391,14 +1437,12 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
                         height: 46,
                         width: 46,
                         decoration: BoxDecoration(
-                          color: ColorName.primarybackground.withValues(
-                            alpha: 0.08,
-                          ),
+                          color: primaryColor.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(13),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.inventory_2_outlined,
-                          color: ColorName.primarybackground,
+                          color: primaryColor,
                         ),
                       ),
 
@@ -1494,7 +1538,7 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
                         child: DropdownButtonFormField<String>(
                           value: _discountType,
                           isExpanded: true,
-                          decoration: AppStyle.inputDecoration(
+                          decoration: _inputDecoration(
                             label: 'Discount',
                             prefixIcon: const Icon(Icons.local_offer_outlined),
                           ),
@@ -1638,7 +1682,7 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
                         isProcessing ? 'Updating...' : 'Save Changes',
                       ),
                       style: FilledButton.styleFrom(
-                        backgroundColor: ColorName.primarybackground,
+                        backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -1660,9 +1704,9 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
                       icon: const Icon(Icons.delete_outline_rounded),
                       label: const Text('Delete Inventory'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: ColorName.dangerLight,
+                        foregroundColor: isDark ? context.customColors.danger : ColorName.dangerLight,
                         side: BorderSide(
-                          color: ColorName.dangerLight.withValues(alpha: 0.4),
+                          color: (isDark ? context.customColors.danger : ColorName.dangerLight).withValues(alpha: 0.4),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -1688,19 +1732,17 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
 
     final hasDiscount = mrp > 0 && discount > 0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorName.primarybackground.withValues(alpha: 0.10),
-            ColorName.primarybackground.withValues(alpha: 0.04),
-          ],
-        ),
+        color: isDark ? Colors.white.withValues(alpha: 0.03) : AppStyle.backgroundColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: ColorName.primarybackground.withValues(alpha: 0.18),
+          color: isDark ? context.customColors.border : ColorName.primarybackground.withValues(alpha: 0.15),
         ),
       ),
       child: Row(
@@ -1709,7 +1751,7 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
             height: 42,
             width: 42,
             decoration: BoxDecoration(
-              color: ColorName.primarybackground,
+              color: primaryColor,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -1730,9 +1772,7 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.color?.withValues(alpha: 0.65),
+                    color: context.customColors.secondaryText,
                   ),
                 ),
 
@@ -1740,10 +1780,10 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
 
                 Text(
                   '₹${_formatAmount(sellingPrice)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: ColorName.primarybackground,
+                    color: primaryColor,
                   ),
                 ),
               ],
@@ -1788,7 +1828,7 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       onChanged: onChanged,
-      decoration: AppStyle.inputDecoration(
+      decoration: _inputDecoration(
         label: label,
         hint: 'Enter $label',
         prefixIcon: Icon(icon),
@@ -1806,16 +1846,18 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
   }
 
   Widget _sectionTitle({required IconData icon, required String title}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return Row(
       children: [
         Container(
           height: 32,
           width: 32,
           decoration: BoxDecoration(
-            color: ColorName.primarybackground.withValues(alpha: 0.08),
+            color: primaryColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(9),
           ),
-          child: Icon(icon, size: 17, color: ColorName.primarybackground),
+          child: Icon(icon, size: 17, color: primaryColor),
         ),
         const SizedBox(width: 9),
         Text(
@@ -1979,8 +2021,12 @@ class _ManageInventorySheetState extends ConsumerState<_ManageInventorySheet> {
   }
 
   void _showError(String message) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(backgroundColor: ColorName.dangerLight, content: Text(message)),
+      SnackBar(
+        backgroundColor: isDark ? context.customColors.danger : ColorName.dangerLight,
+        content: Text(message),
+      ),
     );
   }
 }
