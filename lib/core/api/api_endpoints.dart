@@ -19,9 +19,10 @@ class ApiEndpoints {
 
   // ================= INVENTORY =================
 
-  static const String inventoryCategories = '/inventory/categories';
-  static const String inventoryBrands = '/inventory/brands';
-  static const String inventoryProducts = '/inventory/products';
-  static const String inventoryProductDetails = '/inventory/products';
-  static const String inventorySubmit = '/inventory';
+  static const String inventoryCategories = '/category';
+  static const String inventoryBrands = '/brand';
+  static const String inventoryProducts = '/product';
+  static const String inventorySubmit = '/product/request';
+  static const String productRequest = '/product/request';
+  static const String inventorys = '/inventory';
 }

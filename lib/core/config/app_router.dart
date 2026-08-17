@@ -3,6 +3,8 @@ import 'package:adm_seller/core/navigation/navigation_config.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/auth/screens/startup_screen.dart';
 import 'package:adm_seller/modules/inventory/screens/add_inventory_screen.dart';
+import 'package:adm_seller/modules/inventory/screens/add_new_product_screen.dart';
+import 'package:adm_seller/modules/inventory/screens/inventory_screen.dart';
 import 'package:adm_seller/modules/order/screens/home_screen.dart';
 import 'package:adm_seller/modules/order/screens/profile_screen.dart';
 import 'package:adm_seller/modules/wallet/screen/seller_wallet_screen.dart';
@@ -26,8 +28,11 @@ class AppRoutes {
   static const String orders = '/orders';
   static const String allCategory = '/allcategory';
   static const String profile = '/profile';
-  static const String products = '/products';
+  // static const String products = '/products';
   static const String wallets = '/wallets';
+  static const String inventoryList = '/inventoryList';
+  static const String addInventory = '/addInventory';
+  static const String addProduct = '/addProduct';
 }
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -43,7 +48,7 @@ class _RouterRefresh extends ChangeNotifier {
 bool _isAppRoute(String path) {
   return path == AppRoutes.wallets ||
       path == AppRoutes.orders ||
-      path == AppRoutes.products ||
+      path == AppRoutes.inventoryList ||
       path == AppRoutes.profile;
 }
 
@@ -162,18 +167,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       // Pre-auth routes
       GoRoute(
+        name: 'startup', // Add name
         path: AppRoutes.startup,
         builder: (_, __) => const StartupScreen(),
       ),
-      GoRoute(path: AppRoutes.splash, builder: (_, __) => const SplashScreen()),
-      GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(
+        name: 'splash',
+        path: AppRoutes.splash,
+        builder: (_, __) => const SplashScreen(),
+      ),
+      GoRoute(
+        name: 'login',
+        path: AppRoutes.login,
+        builder: (_, __) => const LoginScreen(),
+      ),
 
       // Post-auth status screens
       GoRoute(
+        name: 'profileSetup',
         path: AppRoutes.profileSetup,
         builder: (_, __) => const ProfileSetupScreen(),
       ),
       GoRoute(
+        name: 'verificationSubmission',
         path: AppRoutes.verificationSubmission,
         builder: (_, __) => const VerificationSubmissionScreen(),
       ),
@@ -186,35 +202,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
         routes: [
           GoRoute(
+            name: 'dashboard',
             path: AppRoutes.dashboard,
             builder: (_, __) => const DashboardScreen(),
           ),
-          GoRoute(path: AppRoutes.home, builder: (_, __) => const HomeScreen()),
           GoRoute(
+            name: 'home',
+            path: AppRoutes.home,
+            builder: (_, __) => const HomeScreen(),
+          ),
+          GoRoute(
+            name: 'orders',
             path: AppRoutes.orders,
             builder: (_, __) => const OrdersScreen(),
           ),
           GoRoute(
+            name: 'wallets',
             path: AppRoutes.wallets,
             builder: (_, __) => const SellerWalletScreen(),
           ),
           GoRoute(
-            path: AppRoutes.products,
+            name: 'inventoryList',
+            path: AppRoutes.inventoryList,
+            builder: (_, __) => const InventoryScreen(),
+          ),
+          GoRoute(
+            name: 'addInventory', // Add name
+            path: AppRoutes.addInventory,
             builder: (_, __) => const AddInventoryScreen(),
           ),
-          // GoRoute(
-          //   path: AppRoutes.riderDashboard,
-          //   builder: (_, __) => const RiderDashboardScreen(),
-          // ),
-          // GoRoute(
-          //   path: AppRoutes.riderDeliveries,
-          //   builder: (_, __) => const RiderDeliveriesScreen(),
-          // ),
-          // GoRoute(
-          //   path: AppRoutes.riderEarnings,
-          //   builder: (_, __) => const RiderEarningsScreen(),
-          // ),
           GoRoute(
+            name: 'addProduct', // Add name
+            path: AppRoutes.addProduct,
+            builder: (_, __) => const AddNewProductScreen(),
+          ),
+          GoRoute(
+            name: 'profile',
             path: AppRoutes.profile,
             builder: (_, __) => const ProfileScreen(),
           ),

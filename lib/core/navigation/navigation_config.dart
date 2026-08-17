@@ -3,6 +3,7 @@ import 'package:adm_seller/core/config/app_router.dart';
 import 'package:adm_seller/core/shared/const/role_enum.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
 import 'package:adm_seller/modules/inventory/screens/add_inventory_screen.dart';
+import 'package:adm_seller/modules/inventory/screens/inventory_screen.dart';
 import 'package:adm_seller/modules/order/screens/dashboard_screen.dart';
 import 'package:adm_seller/modules/order/screens/profile_screen.dart';
 import 'package:adm_seller/modules/wallet/screen/seller_wallet_screen.dart';
@@ -121,8 +122,8 @@ class NavigationConfig {
       label: 'Inventory',
       iconPath: AppIcons.inventory,
       activeIconPath: AppIcons.inventory,
-      route: AppRoutes.products,
-      screen: const AddInventoryScreen(),
+      route: AppRoutes.inventoryList,
+      screen: const InventoryScreen(),
       allowedRoles: [RoleEnum.seller],
     ),
     NavigationItem(
@@ -199,15 +200,14 @@ class NavigationConfig {
       allowedRoles: [RoleEnum.rider],
     ),
 
-    NavigationItem(
-      label: 'Earnings',
-      iconPath: AppIcons.all,
-      activeIconPath: AppIcons.all,
-      route: AppRoutes.products,
-      screen: const RiderEarningsScreen(),
-      allowedRoles: [RoleEnum.rider],
-    ),
-
+    // NavigationItem(
+    //   label: 'Earnings',
+    //   iconPath: AppIcons.all,
+    //   activeIconPath: AppIcons.all,
+    //   route: AppRoutes.products,
+    //   screen: const RiderEarningsScreen(),
+    //   allowedRoles: [RoleEnum.rider],
+    // ),
     NavigationItem(
       label: 'Profile',
       iconPath: AppIcons.profile,

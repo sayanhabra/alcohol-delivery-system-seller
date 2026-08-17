@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:adm_seller/core/api/api_service.dart';
+import 'package:adm_seller/modules/inventory/models/category_brand_data.dart';
+import 'package:adm_seller/modules/inventory/models/product_details_response.dart';
+import 'package:adm_seller/modules/inventory/models/product_variant_request_model.dart';
 import 'package:flutter_riverpod/legacy.dart';
-
-import '../models/inventory_models.dart';
 
 final addInventoryProvider =
     StateNotifierProvider<AddInventoryNotifier, AddInventoryState>((ref) {
@@ -19,20 +20,24 @@ class AddInventoryState {
   final bool isLoadingProductDetails;
   final bool isSubmitting;
 
-  final List<InventoryOption> categories;
-  final List<InventoryOption> brands;
-  final List<InventoryOption> products;
+  final List<CategoryBrandData> categories;
+  final List<CategoryBrandData> brands;
+  final List<CategoryBrandData> products;
 
-  final InventoryOption? selectedCategory;
-  final InventoryOption? selectedBrand;
-  final InventoryOption? selectedProduct;
+  final CategoryBrandData? selectedCategory;
+  final CategoryBrandData? selectedBrand;
+  final CategoryBrandData? selectedProduct;
 
-  final ProductDetail? productDetail;
+  final ProductDetailsResponse? productDetail;
 
-  final ProductVariant? selectedVariant;
-  final List<ProductVariant> variants;
+  final ProductVariantResponse? selectedVariant;
+  final List<ProductVariantResponse> variants;
+
+  final int availableQuantity;
+  final int reserveQuantity;
 
   final String? errorMessage;
+  final bool isAddingVariant;
 
   const AddInventoryState({
     this.isLoadingCategories = false,
@@ -40,16 +45,26 @@ class AddInventoryState {
     this.isLoadingProducts = false,
     this.isLoadingProductDetails = false,
     this.isSubmitting = false,
+
     this.categories = const [],
     this.brands = const [],
     this.products = const [],
+
     this.selectedCategory,
     this.selectedBrand,
     this.selectedProduct,
+
     this.productDetail,
+
     this.selectedVariant,
     this.variants = const [],
+
+    this.availableQuantity = 0,
+    this.reserveQuantity = 0,
+
     this.errorMessage,
+
+    this.isAddingVariant = false,
   });
 
   AddInventoryState copyWith({
@@ -59,18 +74,21 @@ class AddInventoryState {
     bool? isLoadingProductDetails,
     bool? isSubmitting,
 
-    List<InventoryOption>? categories,
-    List<InventoryOption>? brands,
-    List<InventoryOption>? products,
+    List<CategoryBrandData>? categories,
+    List<CategoryBrandData>? brands,
+    List<CategoryBrandData>? products,
 
-    InventoryOption? selectedCategory,
-    InventoryOption? selectedBrand,
-    InventoryOption? selectedProduct,
+    CategoryBrandData? selectedCategory,
+    CategoryBrandData? selectedBrand,
+    CategoryBrandData? selectedProduct,
 
-    ProductDetail? productDetail,
+    ProductDetailsResponse? productDetail,
 
-    ProductVariant? selectedVariant,
-    List<ProductVariant>? variants,
+    ProductVariantResponse? selectedVariant,
+    List<ProductVariantResponse>? variants,
+
+    int? availableQuantity,
+    int? reserveQuantity,
 
     String? errorMessage,
 
@@ -80,6 +98,8 @@ class AddInventoryState {
     bool clearProductDetail = false,
     bool clearVariant = false,
     bool clearError = false,
+
+    bool? isAddingVariant,
   }) {
     return AddInventoryState(
       isLoadingCategories: isLoadingCategories ?? this.isLoadingCategories,
@@ -96,9 +116,7 @@ class AddInventoryState {
       selectedCategory: clearCategory
           ? null
           : selectedCategory ?? this.selectedCategory,
-
       selectedBrand: clearBrand ? null : selectedBrand ?? this.selectedBrand,
-
       selectedProduct: clearProduct
           ? null
           : selectedProduct ?? this.selectedProduct,
@@ -110,10 +128,14 @@ class AddInventoryState {
       selectedVariant: clearVariant
           ? null
           : selectedVariant ?? this.selectedVariant,
-
       variants: variants ?? this.variants,
 
+      availableQuantity: availableQuantity ?? this.availableQuantity,
+      reserveQuantity: reserveQuantity ?? this.reserveQuantity,
+
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
+
+      isAddingVariant: isAddingVariant ?? this.isAddingVariant,
     );
   }
 }
@@ -122,10 +144,49 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   final ApiService _apiService;
 
   Timer? _categoryDebounce;
+  Timer? _brandDebounce;
   Timer? _productDebounce;
 
   AddInventoryNotifier(this._apiService) : super(const AddInventoryState());
 
+  void selectVariant(ProductVariantResponse variant) {
+    state = state.copyWith(selectedVariant: variant);
+  }
+
+  List<CategoryBrandData> _parseCategoryBrandList(dynamic data) {
+    if (data is! Map) {
+      return [];
+    }
+
+    final response = data['response'];
+
+    if (response is! Map) {
+      return [];
+    }
+
+    final responseData = response['data'];
+
+    if (responseData is! List) {
+      return [];
+    }
+
+    return responseData
+        .whereType<Map>()
+        .map(
+          (item) => CategoryBrandData.fromJson(Map<String, dynamic>.from(item)),
+        )
+        .toList();
+  }
+
+  //initial data load
+
+  Future<void> loadInitialData() async {
+    await Future.wait([
+      _fetchCategories(''),
+      _fetchBrands(''),
+      // _fetchProducts(''),
+    ]);
+  }
   // ============================================================
   // CATEGORY
   // ============================================================
@@ -133,14 +194,37 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   void searchCategories(String value) {
     _categoryDebounce?.cancel();
 
-    if (value.trim().isEmpty) {
-      state = state.copyWith(categories: [], isLoadingCategories: false);
+    final search = value.trim();
+
+    _categoryDebounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchCategories(search);
+    });
+  }
+
+  void addNewVariant({required String sku, required int volumeMl}) {
+    final trimmedSku = sku.trim();
+
+    if (trimmedSku.isEmpty || volumeMl <= 0) {
       return;
     }
 
-    _categoryDebounce = Timer(const Duration(milliseconds: 500), () {
-      _fetchCategories(value.trim());
-    });
+    final newVariant = ProductVariantResponse(
+      id: DateTime.now().millisecondsSinceEpoch,
+      productId: state.productDetail?.id ?? 0,
+      sku: trimmedSku,
+      volumeMl: volumeMl,
+      isDefault: state.variants.isEmpty,
+      status: 'ACTIVE',
+      createdAt: null,
+      updatedAt: null,
+    );
+
+    final updatedVariants = [...state.variants, newVariant];
+
+    state = state.copyWith(
+      variants: updatedVariants,
+      selectedVariant: newVariant,
+    );
   }
 
   Future<void> _fetchCategories(String search) async {
@@ -149,13 +233,11 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
     try {
       final response = await _apiService.searchInventoryCategories(search);
 
-      final list = _extractList(response.data);
+      final categories = _parseCategoryBrandList(response.data);
 
       state = state.copyWith(
         isLoadingCategories: false,
-        categories: list
-            .map((e) => InventoryOption.fromJson(Map<String, dynamic>.from(e)))
-            .toList(),
+        categories: categories,
       );
     } catch (e) {
       state = state.copyWith(
@@ -169,40 +251,33 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   // CATEGORY SELECT
   // ============================================================
 
-  Future<void> selectCategory(InventoryOption category) async {
-    state = state.copyWith(
-      selectedCategory: category,
-      brands: [],
-      products: [],
-      clearBrand: true,
-      clearProduct: true,
-      clearProductDetail: true,
-      clearVariant: true,
-    );
-
-    await _fetchBrands(category.id);
+  void selectCategory(CategoryBrandData category) {
+    state = state.copyWith(selectedCategory: category);
   }
 
   // ============================================================
   // BRAND
   // ============================================================
 
-  Future<void> _fetchBrands(int categoryId) async {
+  void searchBrands(String value) {
+    _brandDebounce?.cancel();
+
+    final search = value.trim();
+
+    _brandDebounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchBrands(search);
+    });
+  }
+
+  Future<void> _fetchBrands(String search) async {
     state = state.copyWith(isLoadingBrands: true, clearError: true);
 
     try {
-      final response = await _apiService.getInventoryBrands(
-        categoryId: categoryId,
-      );
+      final response = await _apiService.searchInventoryBrands(search);
 
-      final list = _extractList(response.data);
+      final brands = _parseCategoryBrandList(response.data);
 
-      state = state.copyWith(
-        isLoadingBrands: false,
-        brands: list
-            .map((e) => InventoryOption.fromJson(Map<String, dynamic>.from(e)))
-            .toList(),
-      );
+      state = state.copyWith(isLoadingBrands: false, brands: brands);
     } catch (e) {
       state = state.copyWith(
         isLoadingBrands: false,
@@ -214,17 +289,8 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   // ============================================================
   // BRAND SELECT
   // ============================================================
-
-  Future<void> selectBrand(InventoryOption brand) async {
-    state = state.copyWith(
-      selectedBrand: brand,
-      products: [],
-      clearProduct: true,
-      clearProductDetail: true,
-      clearVariant: true,
-    );
-
-    await _fetchProducts(brand.id);
+  void selectBrand(CategoryBrandData brand) {
+    state = state.copyWith(selectedBrand: brand);
   }
 
   // ============================================================
@@ -234,32 +300,27 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   void searchProducts(String value) {
     _productDebounce?.cancel();
 
-    if (state.selectedBrand == null) {
+    final search = value.trim();
+
+    if (search.isEmpty) {
+      state = state.copyWith(products: [], isLoadingProducts: false);
       return;
     }
 
     _productDebounce = Timer(const Duration(milliseconds: 500), () {
-      _fetchProducts(state.selectedBrand!.id, search: value.trim());
+      _fetchProducts(search);
     });
   }
 
-  Future<void> _fetchProducts(int brandId, {String search = ''}) async {
+  Future<void> _fetchProducts(String search) async {
     state = state.copyWith(isLoadingProducts: true, clearError: true);
 
     try {
-      final response = await _apiService.getInventoryProducts(
-        brandId: brandId,
-        search: search,
-      );
+      final response = await _apiService.searchInventoryProducts(search);
 
-      final list = _extractList(response.data);
+      final products = _parseCategoryBrandList(response.data);
 
-      state = state.copyWith(
-        isLoadingProducts: false,
-        products: list
-            .map((e) => InventoryOption.fromJson(Map<String, dynamic>.from(e)))
-            .toList(),
-      );
+      state = state.copyWith(isLoadingProducts: false, products: products);
     } catch (e) {
       state = state.copyWith(
         isLoadingProducts: false,
@@ -268,11 +329,25 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
     }
   }
 
+  Future<List<CategoryBrandData>> fetchCategories(String query) async {
+    final response = await _apiService.searchInventoryCategories(query);
+    return _parseCategoryBrandList(response.data);
+  }
+
+  Future<List<CategoryBrandData>> fetchBrands(String query) async {
+    final response = await _apiService.searchInventoryBrands(query);
+    return _parseCategoryBrandList(response.data);
+  }
+
+  Future<List<CategoryBrandData>> fetchProducts(String query) async {
+    final response = await _apiService.searchInventoryProducts(query);
+    return _parseCategoryBrandList(response.data);
+  }
   // ============================================================
   // PRODUCT SELECT
   // ============================================================
 
-  Future<void> selectProduct(InventoryOption product) async {
+  Future<void> selectProduct(CategoryBrandData product) async {
     state = state.copyWith(
       selectedProduct: product,
       clearProductDetail: true,
@@ -295,22 +370,52 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
         productId: productId,
       );
 
-      final data = response.data;
+      final rawData = response.data;
 
-      final Map<String, dynamic> json;
+      Map<String, dynamic>? productJson;
 
-      if (data is Map<String, dynamic>) {
-        json = data;
-      } else {
-        json = {};
+      if (rawData is Map<String, dynamic>) {
+        // ============================================================
+        // API RESPONSE
+        //
+        // {
+        //   "statusCode": 200,
+        //   "message": "...",
+        //   "response": {
+        //      "id": 3,
+        //      "name": "test3",
+        //      ...
+        //   }
+        // }
+        // ============================================================
+
+        final apiResponse = rawData['response'];
+
+        if (apiResponse is Map<String, dynamic>) {
+          // Product details API returns the product
+          // directly inside response.
+          productJson = apiResponse;
+        }
+
+        // Fallback in case ApiService already unwraps response
+        if (productJson == null &&
+            rawData.containsKey('id') &&
+            rawData.containsKey('name')) {
+          productJson = rawData;
+        }
       }
 
-      final detail = ProductDetail.fromJson(json);
+      if (productJson == null || productJson.isEmpty) {
+        throw Exception('Invalid product details response');
+      }
+
+      final detail = ProductDetailsResponse.fromJson(productJson);
 
       state = state.copyWith(
         isLoadingProductDetails: false,
         productDetail: detail,
         variants: detail.variants,
+        selectedVariant: _getDefaultVariant(detail.variants),
       );
     } catch (e) {
       state = state.copyWith(
@@ -320,31 +425,34 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
     }
   }
 
-  // ============================================================
-  // VARIANT
-  // ============================================================
+  ProductVariantResponse? _getDefaultVariant(
+    List<ProductVariantResponse> variants,
+  ) {
+    if (variants.isEmpty) {
+      return null;
+    }
 
-  void selectVariant(ProductVariant variant) {
-    state = state.copyWith(selectedVariant: variant);
+    for (final variant in variants) {
+      if (variant.isDefault) {
+        return variant;
+      }
+    }
+
+    // If API doesn't mark any variant as default,
+    // select the first one.
+    return variants.first;
   }
 
-  void addNewVariant({required String name, String? value}) {
-    if (name.trim().isEmpty) return;
+  //quantities
+  // setAvailableQuantity
 
-    final newVariant = ProductVariant(
-      id: DateTime.now().millisecondsSinceEpoch,
-      name: name.trim(),
-      value: value?.trim(),
-    );
-
-    final updatedVariants = [...state.variants, newVariant];
-
-    state = state.copyWith(
-      variants: updatedVariants,
-      selectedVariant: newVariant,
-    );
+  void setAvailableQuantity(int qty) {
+    state = state.copyWith(availableQuantity: qty);
   }
 
+  void setReserveQuantity(int qty) {
+    state = state.copyWith(reserveQuantity: qty);
+  }
   // ============================================================
   // SUBMIT
   // ============================================================
@@ -352,14 +460,13 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   Future<bool> submitInventory({
     required int mrp,
     required String discountType,
-    required double discountValue,
+    required int discountValue,
   }) async {
-    if (state.selectedCategory == null ||
-        state.selectedBrand == null ||
-        state.selectedProduct == null) {
-      state = state.copyWith(
-        errorMessage: 'Please select category, brand and product.',
-      );
+    if (
+    // state.selectedCategory == null ||
+    //   state.selectedBrand == null ||
+    state.availableQuantity == null || state.selectedProduct == null) {
+      state = state.copyWith(errorMessage: 'Please select product.');
 
       return false;
     }
@@ -374,15 +481,20 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
       );
 
       final payload = {
-        'category_id': state.selectedCategory!.id,
-        'brand_id': state.selectedBrand!.id,
-        'product_id': state.selectedProduct!.id,
-        'variant_id': state.selectedVariant?.id,
-        'variant_name': state.selectedVariant?.name,
-        'mrp': mrp,
-        'discount_type': discountType,
-        'discount_value': discountValue,
-        'final_price': finalPrice,
+        // 'category_id': state.selectedCategory?.id,
+        // 'brand_id': state.selectedBrand?.id,
+        'productId': state.selectedProduct?.id,
+        'variantId': state.selectedVariant?.id,
+        // 'variant_name': state.selectedVariant?.sku,
+        'mrp': mrp * 100,
+        'discountType': discountType == 'percent' ? "PERCENTAGE" : "FLAT",
+        'discountValue': discountType == "percent"
+            ? discountValue
+            : (discountValue * 100),
+        // 'finalPrice': finalPrice * 100,
+        'sellingPrice': finalPrice * 100,
+        'availableQuantity': state.availableQuantity,
+        'reservedQuantity': state.reserveQuantity,
       };
 
       await _apiService.submitInventory(payload);
@@ -401,28 +513,25 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
   // PRICE
   // ============================================================
 
-  double calculateFinalPrice({
+  int calculateFinalPrice({
     required int mrp,
     required String discountType,
-    required double discountValue,
+    required int discountValue,
   }) {
     if (discountValue <= 0) {
-      return mrp.toDouble();
+      return mrp;
     }
 
-    double finalPrice;
+    int finalPrice;
 
     if (discountType == 'percent') {
-      finalPrice = mrp - (mrp * discountValue / 100);
+      // Integer arithmetic to compute percentage directly on paisa
+      finalPrice = (mrp * (100 - discountValue)) ~/ 100;
     } else {
       finalPrice = mrp - discountValue;
     }
 
-    if (finalPrice < 0) {
-      return 0;
-    }
-
-    return finalPrice;
+    return finalPrice < 0 ? 0 : finalPrice;
   }
 
   // ============================================================
@@ -435,16 +544,32 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
     }
 
     if (data is Map<String, dynamic>) {
+      // Your actual API:
+      //
+      // response
+      //   └── data
+      //
+      final response = data['response'];
+
+      if (response is Map<String, dynamic>) {
+        final responseData = response['data'];
+
+        if (responseData is List) {
+          return responseData;
+        }
+      }
+
+      // Fallback support
+      if (data['data'] is List) {
+        return data['data'];
+      }
+
       if (data['items'] is List) {
         return data['items'];
       }
 
       if (data['results'] is List) {
         return data['results'];
-      }
-
-      if (data['data'] is List) {
-        return data['data'];
       }
     }
 
@@ -455,9 +580,49 @@ class AddInventoryNotifier extends StateNotifier<AddInventoryState> {
     state = state.copyWith(clearError: true);
   }
 
+  Future<bool> addProductVariant({
+    required int productId,
+    required String sku,
+    required int volumeMl,
+    bool isDefault = false,
+    String status = 'ACTIVE',
+  }) async {
+    state = state.copyWith(isAddingVariant: true, clearError: true);
+
+    try {
+      final request = AddProductVariantRequest(
+        sku: sku.trim(),
+        volumeMl: volumeMl,
+        isDefault: isDefault,
+        status: status,
+      );
+
+      await _apiService.addProductVariant(
+        productId: productId,
+        request: request,
+      );
+
+      // Reload product details so the newly
+      // created variant comes from the backend.
+      await _fetchProductDetails(productId);
+
+      state = state.copyWith(isAddingVariant: false);
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isAddingVariant: false,
+        errorMessage: e.toString(),
+      );
+
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _categoryDebounce?.cancel();
+    _brandDebounce?.cancel();
     _productDebounce?.cancel();
 
     super.dispose();

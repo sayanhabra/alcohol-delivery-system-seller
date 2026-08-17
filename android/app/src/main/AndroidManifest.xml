@@ -7,6 +7,7 @@
     <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- GPS hardware -->
     <uses-feature
@@ -24,7 +25,7 @@
         <!-- ===================================================== -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="cccccc" />
+            android:value="AIzaSyCkgyvNZ3rRNEh45y24PzAg6GfqbC7KwG0" />
 
         <!-- ===================================================== -->
         <!-- Main Activity                                         -->

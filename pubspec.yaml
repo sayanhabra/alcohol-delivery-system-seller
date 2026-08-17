@@ -51,6 +51,7 @@ dependencies:
   image_picker: ^1.2.3
   intl: ^0.20.3
   lottie: ^3.5.1
+  custom_dropdown_pro: ^0.0.7
   # cookie_jar: ^4.0.9
   # dio_cookie_manager: ^3.5.0
 

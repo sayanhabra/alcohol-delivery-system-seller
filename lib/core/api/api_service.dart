@@ -1,9 +1,17 @@
+import 'dart:convert';
+
 import 'package:adm_seller/modules/auth/models/check_phone_response.dart';
 import 'package:adm_seller/modules/auth/models/seller_profile_response.dart';
 import 'package:adm_seller/modules/auth/models/send_otp_response.dart';
 import 'package:adm_seller/modules/auth/models/verify_otp_request.dart';
 import 'package:adm_seller/modules/auth/models/verify_otp_response.dart';
+import 'package:adm_seller/modules/inventory/models/inventory_list_response.dart';
+import 'package:adm_seller/modules/inventory/models/inventory_request_models.dart';
+import 'package:adm_seller/modules/inventory/models/product_request_models.dart';
+import 'package:adm_seller/modules/inventory/models/product_variant_request_model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'api_client.dart';
 import 'api_endpoints.dart';
@@ -160,49 +168,95 @@ class ApiService {
 
   // ==================== INVENTORY ====================
 
+  Future<InventoryListResponse> getInventory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return _handler.get(
+      endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventorys}',
+      queryParameters: {'page': page, 'limit': limit},
+      fromJson: (json) => InventoryListResponse.fromJson(json),
+      errorMessage: 'Failed to get inventory',
+    );
+  }
+
+  Future<BaseResponseModel> updateInventory({
+    required int inventoryId,
+    required UpdateInventoryRequest request,
+  }) async {
+    return _handler.patch(
+      endpoint:
+          '${ApiEndpoints.baseUrlSeller}'
+          '${ApiEndpoints.inventorys}/$inventoryId',
+      data: request.toJson(),
+      contentType: RequestContentType.json,
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to update inventory',
+    );
+  }
+
+  Future<BaseResponseModel> deleteInventory(int inventoryId) async {
+    return _handler.delete(
+      endpoint:
+          '${ApiEndpoints.baseUrlSeller}'
+          '${ApiEndpoints.inventorys}/$inventoryId',
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to delete inventory',
+    );
+  }
+
+  Future<BaseResponseModel> addProductVariant({
+    required int productId,
+    required AddProductVariantRequest request,
+  }) async {
+    return _handler.post(
+      endpoint:
+          '${ApiEndpoints.baseUrlSeller}'
+          '${ApiEndpoints.inventoryProducts}'
+          '/$productId/variant',
+      data: request.toJson(),
+      contentType: RequestContentType.json,
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to add product variant',
+    );
+  }
+
   Future<BaseResponseModel> searchInventoryCategories(String search) async {
     return _handler.get(
       endpoint:
           '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryCategories}',
-      queryParameters: {'search': search},
+      queryParameters: {'search': search.trim()},
       fromJson: (json) => BaseResponseModel.fromJson(json),
       errorMessage: 'Failed to search categories',
     );
   }
 
-  Future<BaseResponseModel> getInventoryBrands({
-    required int categoryId,
-  }) async {
+  Future<BaseResponseModel> searchInventoryBrands(String search) async {
     return _handler.get(
       endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryBrands}',
-      queryParameters: {'category_id': categoryId},
+      queryParameters: {'search': search.trim()},
       fromJson: (json) => BaseResponseModel.fromJson(json),
-      errorMessage: 'Failed to load brands',
+      errorMessage: 'Failed to search brands',
     );
   }
 
-  Future<BaseResponseModel> getInventoryProducts({
-    required int brandId,
-    String search = '',
-  }) async {
+  Future<BaseResponseModel> searchInventoryProducts(String search) async {
     return _handler.get(
       endpoint:
           '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryProducts}',
-      queryParameters: {
-        'brand_id': brandId,
-        if (search.isNotEmpty) 'search': search,
-      },
+      queryParameters: {'search': search.trim()},
       fromJson: (json) => BaseResponseModel.fromJson(json),
-      errorMessage: 'Failed to load products',
+      errorMessage: 'Failed to search products',
     );
   }
+  //================================================
 
   Future<BaseResponseModel> getInventoryProductDetails({
     required int productId,
   }) async {
     return _handler.get(
       endpoint:
-          '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryProductDetails}/$productId',
+          '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventoryProducts}/$productId',
       fromJson: (json) => BaseResponseModel.fromJson(json),
       errorMessage: 'Failed to load product details',
     );
@@ -210,11 +264,44 @@ class ApiService {
 
   Future<BaseResponseModel> submitInventory(Map<String, dynamic> data) async {
     return _handler.post(
-      endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventorySubmit}',
+      endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventorys}',
       data: data,
       contentType: RequestContentType.json,
       fromJson: (json) => BaseResponseModel.fromJson(json),
       errorMessage: 'Failed to add inventory',
+    );
+  }
+
+  Future<BaseResponseModel> createProductRequest({
+    required ProductRequestModel request,
+    required List<XFile> images,
+  }) async {
+    final formData = FormData.fromMap({
+      'name': request.name,
+      'description': request.description,
+      'brandId': request.brandId,
+      'categoryId': request.categoryId,
+      'alcoholType': request.alcoholType,
+      'unit': request.unit,
+      'alcoholPercentage': request.alcoholPercentage,
+      'packagingType': request.packagingType,
+      'exciseCategory': request.exciseCategory,
+      'complianceInfo': request.complianceInfo,
+      'status': request.status,
+
+      'variants': jsonEncode(request.variants.map((e) => e.toJson()).toList()),
+
+      'images': [
+        for (final image in images)
+          await MultipartFile.fromFile(image.path, filename: image.name),
+      ],
+    });
+
+    return _handler.post(
+      endpoint: '${ApiEndpoints.baseUrlSeller}${ApiEndpoints.inventorySubmit}',
+      data: formData,
+      fromJson: (json) => BaseResponseModel.fromJson(json),
+      errorMessage: 'Failed to create product',
     );
   }
 }

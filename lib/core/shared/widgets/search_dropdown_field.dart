@@ -1,9 +1,9 @@
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
-import 'package:adm_seller/modules/inventory/models/inventory_models.dart';
+import 'package:adm_seller/modules/inventory/models/category_brand_data.dart';
 import 'package:flutter/material.dart';
 
-class SearchDropdownField extends StatelessWidget {
+class SearchDropdownField extends StatefulWidget {
   final TextEditingController controller;
 
   final String label;
@@ -15,14 +15,15 @@ class SearchDropdownField extends StatelessWidget {
   final bool readOnly;
   final bool isLoading;
 
-  final List<InventoryOption> items;
+  final List<CategoryBrandData> items;
 
-  final InventoryOption? selectedItem;
+  final CategoryBrandData? selectedItem;
 
   final ValueChanged<String> onChanged;
-  final ValueChanged<InventoryOption> onSelected;
+  final ValueChanged<CategoryBrandData> onSelected;
 
   const SearchDropdownField({
+    super.key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -37,38 +38,62 @@ class SearchDropdownField extends StatelessWidget {
   });
 
   @override
+  State<SearchDropdownField> createState() => _SearchDropdownFieldState();
+}
+
+class _SearchDropdownFieldState extends State<SearchDropdownField> {
+  late final FocusNode _focusNode;
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _controller = widget.controller;
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    // Do NOT dispose _controller (owned by parent)
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Autocomplete<InventoryOption>(
+    return RawAutocomplete<CategoryBrandData>(
+      textEditingController: _controller,
+      focusNode: _focusNode,
       displayStringForOption: (option) => option.name,
-
-      optionsBuilder: (textEditingValue) {
-        if (items.isEmpty) {
-          return const Iterable<InventoryOption>.empty();
-        }
-
-        return items;
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (!widget.enabled) return const Iterable<CategoryBrandData>.empty();
+        // Return the latest items from the parent directly
+        return widget.items;
       },
-
-      onSelected: onSelected,
-
+      onSelected: (item) {
+        _controller.text = item.name;
+        _controller.selection = TextSelection.collapsed(
+          offset: _controller.text.length,
+        );
+        widget.onSelected(item);
+        // Keep focus after selection
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && widget.enabled) _focusNode.requestFocus();
+        });
+      },
       fieldViewBuilder:
-          (context, fieldController, focusNode, onFieldSubmitted) {
-            if (controller.text.isNotEmpty &&
-                fieldController.text != controller.text) {
-              fieldController.value = controller.value;
-            }
-
+          (context, textEditingController, focusNode, onFieldSubmitted) {
             return TextFormField(
-              controller: fieldController,
+              controller: textEditingController,
               focusNode: focusNode,
-              enabled: enabled,
-              readOnly: readOnly,
-              onChanged: onChanged,
+              enabled: widget.enabled,
+              readOnly: widget.readOnly,
+              onChanged: widget.onChanged,
               decoration: AppStyle.inputDecoration(
-                label: label,
-                hint: hint,
-                prefixIcon: Icon(prefixIcon),
-                suffixIcon: isLoading
+                label: widget.label,
+                hint: widget.hint,
+                prefixIcon: Icon(widget.prefixIcon),
+                suffixIcon: widget.isLoading
                     ? const Padding(
                         padding: EdgeInsets.all(12),
                         child: SizedBox(
@@ -81,8 +106,8 @@ class SearchDropdownField extends StatelessWidget {
               ),
             );
           },
-
       optionsViewBuilder: (context, onSelected, options) {
+        if (options.isEmpty) return const SizedBox.shrink();
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
@@ -98,7 +123,6 @@ class SearchDropdownField extends StatelessWidget {
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final option = options.elementAt(index);
-
                   return ListTile(
                     leading: CircleAvatar(
                       radius: 18,
@@ -113,9 +137,7 @@ class SearchDropdownField extends StatelessWidget {
                     ),
                     title: Text(option.name, style: AppStyle.titleSmall),
                     subtitle: Text('ID: ${option.id}', style: AppStyle.caption),
-                    onTap: () {
-                      onSelected(option);
-                    },
+                    onTap: () => onSelected(option),
                   );
                 },
               ),

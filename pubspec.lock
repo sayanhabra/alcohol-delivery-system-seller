@@ -201,6 +201,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  custom_dropdown_pro:
+    dependency: "direct main"
+    description:
+      name: custom_dropdown_pro
+      sha256: eecb1c8f581753382ac6f86d3052fe50cd57176be42349b91277cca1aeb055cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   dart_style:
     dependency: transitive
     description:
