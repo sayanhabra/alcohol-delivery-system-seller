@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adm_seller/core/config/app_theme.dart';
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/core/shared/widgets/search_dropdown_field.dart';
@@ -63,18 +64,83 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     super.dispose();
   }
 
+  InputDecoration _inputDecoration({
+    String? hint,
+    String? label,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? errorText,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InputDecoration(
+      hintText: hint,
+      labelText: label,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      errorText: errorText,
+      filled: true,
+      fillColor: isDark
+          ? ColorName.inputFillDark
+          : ColorName.inputFillLight.withValues(alpha: 0.58),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? Colors.white24 : ColorName.inputBorderLight,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? ColorName.secondary : ColorName.primary,
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration({bool bordered = true}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return BoxDecoration(
+      color: isDark ? context.customColors.cardBackground : Colors.white,
+      borderRadius: AppStyle.borderRadiusLarge,
+      border: bordered
+          ? Border.all(
+              color: isDark ? context.customColors.border : AppStyle.borderColor,
+            )
+          : null,
+      boxShadow: bordered ? null : [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.06),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addNewProductProvider);
 
     final provider = ref.read(addNewProductProvider.notifier);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppStyle.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: ColorName.primarybackground,
+        backgroundColor: isDark ? Theme.of(context).appBarTheme.backgroundColor : ColorName.primarybackground,
         foregroundColor: Colors.white,
         centerTitle: true,
 
@@ -222,7 +288,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
               return null;
             },
 
-            decoration: AppStyle.inputDecoration(
+            decoration: _inputDecoration(
               label: 'Product Name *',
               hint: 'Enter product name',
               prefixIcon: const Icon(Icons.shopping_bag_outlined),
@@ -244,7 +310,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
               return null;
             },
 
-            decoration: AppStyle.inputDecoration(
+            decoration: _inputDecoration(
               label: 'Description *',
               hint: 'Describe the product',
               prefixIcon: const Icon(Icons.description_outlined),
@@ -390,7 +456,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
               return null;
             },
 
-            decoration: AppStyle.inputDecoration(
+            decoration: _inputDecoration(
               label: 'Alcohol Percentage *',
               hint: 'Example: 42.8',
               prefixIcon: const Icon(Icons.percent),
@@ -440,6 +506,8 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     AddNewProductState state,
     AddNewProductNotifier provider,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return _buildSectionCard(
       title: 'Product Images',
       icon: Icons.photo_library_outlined,
@@ -450,19 +518,19 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: ColorName.primarybackground.withValues(alpha: 0.05),
+              color: primaryColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.info_outline,
                   size: 18,
-                  color: ColorName.primarybackground,
+                  color: primaryColor,
                 ),
-                SizedBox(width: 8),
-                Expanded(
+                const SizedBox(width: 8),
+                const Expanded(
                   child: Text(
                     'Add clear product images in JPG, JPEG or PNG format.',
                     style: TextStyle(fontSize: 12),
@@ -564,8 +632,8 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                     : 'Add More Images',
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: ColorName.primarybackground,
-                side: const BorderSide(color: ColorName.primarybackground),
+                foregroundColor: primaryColor,
+                side: BorderSide(color: primaryColor),
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -591,7 +659,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
 
         maxLines: 4,
 
-        decoration: AppStyle.inputDecoration(
+        decoration: _inputDecoration(
           label: 'Compliance Information',
           hint: 'Enter compliance / regulatory information',
           prefixIcon: const Icon(Icons.policy_outlined),
@@ -608,6 +676,8 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     AddNewProductState state,
     AddNewProductNotifier provider,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return _buildSectionCard(
       title: 'Product Variants *',
       icon: Icons.layers_outlined,
@@ -621,22 +691,22 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
             padding: const EdgeInsets.all(12),
 
             decoration: BoxDecoration(
-              color: ColorName.primarybackground.withValues(alpha: 0.05),
+              color: primaryColor.withValues(alpha: 0.05),
 
               borderRadius: BorderRadius.circular(10),
             ),
 
-            child: const Row(
+            child: Row(
               children: [
                 Icon(
                   Icons.info_outline,
                   size: 18,
-                  color: ColorName.primarybackground,
+                  color: primaryColor,
                 ),
 
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
 
-                Expanded(
+                const Expanded(
                   child: Text(
                     'At least one product variant is required.',
                     style: TextStyle(fontSize: 12),
@@ -670,9 +740,9 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
               label: const Text('Add Variant'),
 
               style: OutlinedButton.styleFrom(
-                foregroundColor: ColorName.primarybackground,
+                foregroundColor: primaryColor,
 
-                side: const BorderSide(color: ColorName.primarybackground),
+                side: BorderSide(color: primaryColor),
 
                 minimumSize: const Size.fromHeight(48),
 
@@ -688,15 +758,18 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
   }
 
   Widget _buildEmptyVariant() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
 
       padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 15),
 
       decoration: BoxDecoration(
-        color: AppStyle.backgroundColor,
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorName.greyBorder),
+        border: Border.all(
+          color: isDark ? context.customColors.border : ColorName.greyBorder,
+        ),
       ),
 
       child: Column(
@@ -727,16 +800,18 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     int index,
     AddNewProductNotifier provider,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppStyle.backgroundColor,
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: variant.isDefault
-              ? ColorName.primarybackground
-              : ColorName.greyBorder,
+              ? primaryColor
+              : (isDark ? context.customColors.border : ColorName.greyBorder),
         ),
       ),
       child: Row(
@@ -745,12 +820,12 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
             height: 46,
             width: 46,
             decoration: BoxDecoration(
-              color: ColorName.primarybackground.withValues(alpha: 0.08),
+              color: primaryColor.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.local_bar_outlined,
-              color: ColorName.primarybackground,
+              color: primaryColor,
             ),
           ),
 
@@ -767,7 +842,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                 Text(
                   '${variant.volumeMl} ML',
                   style: AppStyle.bodySmall.copyWith(
-                    color: AppStyle.textSecondary,
+                    color: context.customColors.secondaryText,
                   ),
                 ),
 
@@ -836,18 +911,20 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
             return AlertDialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: const Row(
+              title: Row(
                 children: [
                   Icon(
                     Icons.local_bar_outlined,
-                    color: ColorName.primarybackground,
+                    color: primaryColor,
                   ),
-                  SizedBox(width: 8),
-                  Text('Add Variant'),
+                  const SizedBox(width: 8),
+                  const Text('Add Variant'),
                 ],
               ),
               content: SingleChildScrollView(
@@ -857,7 +934,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                     TextField(
                       controller: skuController,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: AppStyle.inputDecoration(
+                      decoration: _inputDecoration(
                         label: 'SKU *',
                         hint: 'Example: JW-BLACK-750',
                         prefixIcon: const Icon(Icons.qr_code_2_outlined),
@@ -871,7 +948,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: false,
                       ),
-                      decoration: AppStyle.inputDecoration(
+                      decoration: _inputDecoration(
                         label: 'Volume (ML) *',
                         hint: 'Example: 750',
                         prefixIcon: const Icon(Icons.local_drink_outlined),
@@ -883,7 +960,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: status,
                       isExpanded: true,
-                      decoration: AppStyle.inputDecoration(
+                      decoration: _inputDecoration(
                         label: 'Variant Status',
                         hint: 'Select status',
                       ),
@@ -914,7 +991,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                         'Use this as the primary product variant',
                       ),
                       value: isDefault,
-                      activeColor: ColorName.primarybackground,
+                      activeColor: primaryColor,
                       onChanged: (value) {
                         setDialogState(() {
                           isDefault = value;
@@ -969,6 +1046,8 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
   //IMAGE OPTION PICKER
   //=====================================================
   void _showImageSourcePicker(AddNewProductNotifier provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1001,14 +1080,14 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                       height: 46,
                       width: 46,
                       decoration: BoxDecoration(
-                        color: ColorName.primarybackground.withValues(
+                        color: primaryColor.withValues(
                           alpha: 0.08,
                         ),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.photo_library_outlined,
-                        color: ColorName.primarybackground,
+                        color: primaryColor,
                       ),
                     ),
 
@@ -1026,7 +1105,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                           Text(
                             'Choose how you want to add photos',
                             style: AppStyle.bodySmall.copyWith(
-                              color: AppStyle.textSecondary,
+                              color: context.customColors.secondaryText,
                             ),
                           ),
                         ],
@@ -1076,6 +1155,8 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -1097,10 +1178,10 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
               height: 48,
               width: 48,
               decoration: BoxDecoration(
-                color: ColorName.primarybackground.withValues(alpha: 0.08),
+                color: primaryColor.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: ColorName.primarybackground, size: 24),
+              child: Icon(icon, color: primaryColor, size: 24),
             ),
 
             const SizedBox(width: 14),
@@ -1116,7 +1197,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppStyle.caption.copyWith(
-                      color: AppStyle.textSecondary,
+                      color: context.customColors.secondaryText,
                     ),
                   ),
                 ],
@@ -1146,7 +1227,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
 
       isExpanded: true,
 
-      decoration: AppStyle.inputDecoration(label: label, hint: hint),
+      decoration: _inputDecoration(label: label, hint: hint),
 
       items: items.map((item) {
         return DropdownMenuItem<String>(
@@ -1169,12 +1250,14 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     required IconData icon,
     required Widget child,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return Container(
       width: double.infinity,
 
       padding: const EdgeInsets.all(18),
 
-      decoration: AppStyle.borderedCardDecoration,
+      decoration: _cardDecoration(bordered: true),
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1187,12 +1270,12 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
                 width: 38,
 
                 decoration: BoxDecoration(
-                  color: ColorName.primarybackground.withValues(alpha: 0.08),
+                  color: primaryColor.withValues(alpha: 0.08),
 
                   borderRadius: BorderRadius.circular(10),
                 ),
 
-                child: Icon(icon, color: ColorName.primarybackground, size: 20),
+                child: Icon(icon, color: primaryColor, size: 20),
               ),
 
               const SizedBox(width: 10),
@@ -1214,6 +1297,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
   // ============================================================
 
   Widget _buildError(String message) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
 
@@ -1222,23 +1306,25 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
       padding: const EdgeInsets.all(12),
 
       decoration: BoxDecoration(
-        color: ColorName.toastErrorBg,
+        color: isDark ? context.customColors.danger.withValues(alpha: 0.1) : ColorName.toastErrorBg,
 
-        border: Border.all(color: ColorName.toastErrorBorder),
+        border: Border.all(
+          color: isDark ? context.customColors.danger.withValues(alpha: 0.4) : ColorName.toastErrorBorder,
+        ),
 
         borderRadius: AppStyle.borderRadiusMedium,
       ),
 
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: ColorName.toastErrorIcon),
+          Icon(Icons.error_outline, color: isDark ? context.customColors.danger : ColorName.toastErrorIcon),
 
           const SizedBox(width: 8),
 
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(color: ColorName.toastErrorText),
+              style: TextStyle(color: isDark ? Colors.redAccent.shade100 : ColorName.toastErrorText),
             ),
           ),
         ],

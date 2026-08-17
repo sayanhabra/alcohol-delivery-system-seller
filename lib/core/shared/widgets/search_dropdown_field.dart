@@ -83,15 +83,16 @@ class _SearchDropdownFieldState extends State<SearchDropdownField> {
       },
       fieldViewBuilder:
           (context, textEditingController, focusNode, onFieldSubmitted) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             return TextFormField(
               controller: textEditingController,
               focusNode: focusNode,
               enabled: widget.enabled,
               readOnly: widget.readOnly,
               onChanged: widget.onChanged,
-              decoration: AppStyle.inputDecoration(
-                label: widget.label,
-                hint: widget.hint,
+              decoration: InputDecoration(
+                hintText: widget.hint,
+                labelText: widget.label,
                 prefixIcon: Icon(widget.prefixIcon),
                 suffixIcon: widget.isLoading
                     ? const Padding(
@@ -103,11 +104,39 @@ class _SearchDropdownFieldState extends State<SearchDropdownField> {
                         ),
                       )
                     : const Icon(Icons.keyboard_arrow_down),
+                filled: true,
+                fillColor: isDark
+                    ? ColorName.inputFillDark
+                    : ColorName.inputFillLight.withValues(alpha: 0.58),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white24 : ColorName.inputBorderLight,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark ? ColorName.secondary : ColorName.primary,
+                    width: 1.5,
+                  ),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.redAccent),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+                ),
               ),
             );
           },
       optionsViewBuilder: (context, onSelected, options) {
         if (options.isEmpty) return const SizedBox.shrink();
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final primaryBrandColor = isDark ? ColorName.secondary : ColorName.primarybackground;
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
@@ -126,13 +155,13 @@ class _SearchDropdownFieldState extends State<SearchDropdownField> {
                   return ListTile(
                     leading: CircleAvatar(
                       radius: 18,
-                      backgroundColor: ColorName.primarybackground.withValues(
+                      backgroundColor: primaryBrandColor.withValues(
                         alpha: 0.08,
                       ),
                       child: Icon(
                         Icons.inventory_2_outlined,
                         size: 18,
-                        color: ColorName.primarybackground,
+                        color: primaryBrandColor,
                       ),
                     ),
                     title: Text(option.name, style: AppStyle.titleSmall),

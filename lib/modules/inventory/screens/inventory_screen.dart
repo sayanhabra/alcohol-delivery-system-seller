@@ -1,5 +1,6 @@
 import 'package:adm_seller/core/config/app_icons.dart';
 import 'package:adm_seller/core/config/app_router.dart';
+import 'package:adm_seller/core/config/app_theme.dart';
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/modules/inventory/models/inventory_list_response.dart';
@@ -135,7 +136,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        backgroundColor: ColorName.primarybackground,
+        backgroundColor: isDark ? Theme.of(context).appBarTheme.backgroundColor : ColorName.primarybackground,
         title: const Text(
           'My Inventory',
           style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
@@ -314,8 +315,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: ColorName.primarybackground,
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark ? ColorName.secondary : ColorName.primarybackground,
                 width: 1.5,
               ),
             ),
@@ -511,11 +512,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           items: items,
           onChanged: onChanged,
           selectedItemBuilder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             return items.map((item) {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 16, color: ColorName.primarybackground),
+                  Icon(icon, size: 16, color: isDark ? ColorName.secondary : ColorName.primarybackground),
                   const SizedBox(width: 7),
                   Flexible(
                     child: Text(
@@ -1015,8 +1017,8 @@ class _InventoryCard extends StatelessWidget {
                     label: 'Available',
                     value: '$availableStock',
                     valueColor: availableStock > 0
-                        ? ColorName.successLight
-                        : ColorName.dangerLight,
+                        ? context.customColors.success
+                        : context.customColors.danger,
                   ),
                 ),
               ],
@@ -1054,7 +1056,7 @@ class _InventoryCard extends StatelessWidget {
                   icon: const Icon(Icons.tune_rounded, size: 17),
                   label: const Text('Manage'),
                   style: TextButton.styleFrom(
-                    foregroundColor: ColorName.primarybackground,
+                    foregroundColor: isDark ? Colors.white : ColorName.primarybackground,
                   ),
                 ),
               ],

@@ -1,4 +1,5 @@
 import 'package:adm_seller/core/config/app_router.dart';
+import 'package:adm_seller/core/config/app_theme.dart';
 import 'package:adm_seller/core/shared/styles/app_colors.dart';
 import 'package:adm_seller/core/shared/styles/app_style.dart';
 import 'package:adm_seller/modules/inventory/models/category_brand_data.dart';
@@ -54,6 +55,69 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
     super.dispose();
   }
 
+  InputDecoration _inputDecoration({
+    String? hint,
+    String? label,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? errorText,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InputDecoration(
+      hintText: hint,
+      labelText: label,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      errorText: errorText,
+      filled: true,
+      fillColor: isDark
+          ? ColorName.inputFillDark
+          : ColorName.inputFillLight.withValues(alpha: 0.58),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? Colors.white24 : ColorName.inputBorderLight,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? ColorName.secondary : ColorName.primary,
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration({bool bordered = true}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return BoxDecoration(
+      color: isDark ? context.customColors.cardBackground : Colors.white,
+      borderRadius: AppStyle.borderRadiusLarge,
+      border: bordered
+          ? Border.all(
+              color: isDark ? context.customColors.border : AppStyle.borderColor,
+            )
+          : null,
+      boxShadow: bordered ? null : [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.06),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addInventoryProvider);
@@ -70,11 +134,13 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
       discountValue: discount,
     );
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppStyle.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: ColorName.primarybackground,
+        backgroundColor: isDark ? Theme.of(context).appBarTheme.backgroundColor : ColorName.primarybackground,
         foregroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
@@ -205,10 +271,11 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
     required IconData icon,
     required Widget child,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: AppStyle.borderedCardDecoration,
+      decoration: _cardDecoration(bordered: true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -218,10 +285,10 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                 height: 38,
                 width: 38,
                 decoration: BoxDecoration(
-                  color: ColorName.primarybackground.withValues(alpha: 0.08),
+                  color: (isDark ? ColorName.secondary : ColorName.primarybackground).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: ColorName.primarybackground, size: 20),
+                child: Icon(icon, color: isDark ? ColorName.secondary : ColorName.primarybackground, size: 20),
               ),
 
               const SizedBox(width: 10),
@@ -312,6 +379,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
     AddInventoryState state,
     AddInventoryNotifier provider,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildSectionCard(
       title: 'Inventory Quantities',
       icon: Icons.inventory_2_outlined,
@@ -328,10 +396,9 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                       ? state.availableQuantity.toString()
                       : '',
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Available Qty',
-                    hintText: '0',
-                    border: OutlineInputBorder(),
+                  decoration: _inputDecoration(
+                    label: 'Available Qty',
+                    hint: '0',
                   ),
                   onChanged: (value) {
                     final qty = int.tryParse(value) ?? 0;
@@ -347,10 +414,9 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                       ? state.reserveQuantity.toString()
                       : '',
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Reserve Qty',
-                    hintText: '0',
-                    border: OutlineInputBorder(),
+                  decoration: _inputDecoration(
+                    label: 'Reserve Qty',
+                    hint: '0',
                   ),
                   // controller: _re,
                   onChanged: (value) {
@@ -368,7 +434,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
               Icon(
                 Icons.info_outline,
                 size: 14,
-                color: ColorName.primarybackground.withValues(alpha: 0.6),
+                color: (isDark ? ColorName.secondary : ColorName.primarybackground).withValues(alpha: 0.6),
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -376,7 +442,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                   'Reserved stock is set aside for pending orders or back-ups and is not listed for public sale.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: ColorName.primarybackground.withValues(alpha: 0.6),
+                    color: isDark ? context.customColors.secondaryText : ColorName.primarybackground.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -430,9 +496,9 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
               label: const Text('Add New Product'),
 
               style: OutlinedButton.styleFrom(
-                foregroundColor: ColorName.primarybackground,
+                foregroundColor: Theme.of(context).brightness == Brightness.dark ? ColorName.secondary : ColorName.primarybackground,
 
-                side: const BorderSide(color: ColorName.primarybackground),
+                side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? ColorName.secondary : ColorName.primarybackground),
 
                 minimumSize: const Size.fromHeight(48),
 
@@ -471,6 +537,8 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
 
   Widget _buildProductDetailCard(AddInventoryState state) {
     final product = state.productDetail!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
 
     final images = List<ProductImageResponse>.from(product.images)
       ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
@@ -478,7 +546,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
     return Container(
       margin: const EdgeInsets.only(top: AppStyle.spaceLarge),
       padding: const EdgeInsets.all(18),
-      decoration: AppStyle.cardDecoration,
+      decoration: _cardDecoration(bordered: false),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -491,12 +559,12 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                 height: 38,
                 width: 38,
                 decoration: BoxDecoration(
-                  color: ColorName.primarybackground.withValues(alpha: 0.08),
+                  color: primaryColor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.info_outline,
-                  color: ColorName.primarybackground,
+                  color: primaryColor,
                   size: 21,
                 ),
               ),
@@ -525,7 +593,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                     ? _ProductImageCarousel(images: images)
                     : Container(
                         decoration: BoxDecoration(
-                          color: AppStyle.backgroundColor,
+                          color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
@@ -570,7 +638,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                             child: Text(
                               product.brand!.name,
                               style: AppStyle.bodySmall.copyWith(
-                                color: AppStyle.textSecondary,
+                                color: context.customColors.secondaryText,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -598,7 +666,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                             child: Text(
                               product.category!.name,
                               style: AppStyle.bodySmall.copyWith(
-                                color: AppStyle.textSecondary,
+                                color: context.customColors.secondaryText,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -624,7 +692,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                             Text(
                               '${product.alcoholPercentage}% ABV',
                               style: AppStyle.bodySmall.copyWith(
-                                color: AppStyle.textSecondary,
+                                color: context.customColors.secondaryText,
                               ),
                             ),
                           ],
@@ -646,7 +714,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppStyle.backgroundColor,
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -656,7 +724,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                     'Description',
                     style: AppStyle.bodySmall.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppStyle.textSecondary,
+                      color: context.customColors.secondaryText,
                     ),
                   ),
 
@@ -723,20 +791,34 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
     AddInventoryState state,
     AddInventoryNotifier provider,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
     return Container(
       margin: const EdgeInsets.only(top: AppStyle.spaceLarge),
       padding: const EdgeInsets.all(18),
-      decoration: AppStyle.borderedCardDecoration,
+      decoration: _cardDecoration(bordered: true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.tune, color: ColorName.primarybackground),
+              Container(
+                height: 38,
+                width: 38,
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.layers_outlined,
+                  color: primaryColor,
+                  size: 20,
+                ),
+              ),
 
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
 
-              Text('Select Variant', style: AppStyle.titleLarge),
+              Text('Product Variant', style: AppStyle.titleLarge),
 
               const Spacer(),
 
@@ -759,7 +841,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppStyle.backgroundColor,
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Text(
@@ -781,13 +863,13 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                         ? '${variant.sku} - ${variant.volumeMl}'
                         : variant.sku,
                   ),
-                  selectedColor: ColorName.primarybackground.withValues(
+                  selectedColor: primaryColor.withValues(
                     alpha: 0.15,
                   ),
                   labelStyle: TextStyle(
                     color: selected
-                        ? ColorName.primarybackground
-                        : AppStyle.textPrimary,
+                        ? primaryColor
+                        : (isDark ? Colors.white70 : AppStyle.textPrimary),
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
                   onSelected: (_) {
@@ -824,6 +906,8 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
           builder: (context, setDialogState) {
             final inventoryState = ref.watch(addInventoryProvider);
 
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
             return AlertDialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(22),
@@ -834,27 +918,20 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                     height: 42,
                     width: 42,
                     decoration: BoxDecoration(
-                      color: ColorName.primarybackground.withValues(
+                      color: primaryColor.withValues(
                         alpha: 0.08,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.add_box_outlined,
-                      color: ColorName.primarybackground,
+                    child: Icon(
+                      Icons.add_to_photos_outlined,
+                      color: primaryColor,
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
-                  const Expanded(
-                    child: Text(
-                      'Add New Variant',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+                  const Text(
+                    'Add Variant',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -865,39 +942,26 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                   children: [
                     TextFormField(
                       controller: skuController,
-                      textCapitalization: TextCapitalization.characters,
-                      decoration: AppStyle.inputDecoration(
-                        label: 'SKU',
-                        hint: 'e.g. JW-BLACK-750',
-                        prefixIcon: const Icon(Icons.qr_code_2_outlined),
+                      decoration: _inputDecoration(
+                        label: 'SKU Code',
+                        hint: 'e.g. SKU-123456',
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'SKU is required';
-                        }
-
-                        return null;
-                      },
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'SKU is required' : null,
                     ),
-
-                    const SizedBox(height: 14),
-
+                    const SizedBox(height: 12),
                     TextFormField(
                       controller: volumeController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: AppStyle.inputDecoration(
-                        label: 'Volume (ML)',
+                      decoration: _inputDecoration(
+                        label: 'Volume (ml)',
                         hint: 'e.g. 750',
-                        prefixIcon: const Icon(Icons.local_drink_outlined),
                       ),
-                      validator: (value) {
-                        final volume = int.tryParse(value?.trim() ?? '');
-
+                      validator: (v) {
+                        final volume = int.tryParse(v?.trim() ?? '');
                         if (volume == null || volume <= 0) {
                           return 'Enter valid volume';
                         }
-
                         return null;
                       },
                     ),
@@ -1006,13 +1070,14 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
 
   Widget _buildPricingCard(AddInventoryState state, int finalPrice) {
     final mrp = int.tryParse(_mrpController.text.trim()) ?? 0;
-
     final discount = double.tryParse(_discountController.text.trim()) ?? 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? ColorName.secondary : ColorName.primarybackground;
 
     return Container(
       margin: const EdgeInsets.only(top: AppStyle.spaceLarge),
       padding: const EdgeInsets.all(18),
-      decoration: AppStyle.borderedCardDecoration,
+      decoration: _cardDecoration(bordered: true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1025,12 +1090,12 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                 height: 40,
                 width: 40,
                 decoration: BoxDecoration(
-                  color: ColorName.primarybackground.withValues(alpha: 0.08),
+                  color: primaryColor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.currency_rupee,
-                  color: ColorName.primarybackground,
+                  color: primaryColor,
                   size: 21,
                 ),
               ),
@@ -1046,7 +1111,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                     Text(
                       'Set your selling price and discount',
                       style: AppStyle.bodySmall.copyWith(
-                        color: AppStyle.textSecondary,
+                        color: context.customColors.secondaryText,
                       ),
                     ),
                   ],
@@ -1082,7 +1147,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
 
               return null;
             },
-            decoration: AppStyle.inputDecoration(
+            decoration: _inputDecoration(
               label: 'MRP',
               hint: 'Enter MRP',
               prefixIcon: const Icon(Icons.currency_rupee),
@@ -1104,7 +1169,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                   value: _discountType,
                   isExpanded: true,
                   menuMaxHeight: 280,
-                  decoration: AppStyle.inputDecoration(
+                  decoration: _inputDecoration(
                     label: 'Discount Type',
                     prefixIcon: const Icon(Icons.local_offer_outlined),
                   ),
@@ -1147,11 +1212,6 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                     decimal: true,
                   ),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  // inputFormatters: [
-                  //   FilteringTextInputFormatter.allow(
-                  //     RegExp(r'^\d*\.?\d{0,2}'),
-                  //   ),
-                  // ],
                   onChanged: (_) {
                     setState(() {});
                   },
@@ -1178,7 +1238,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
 
                     return null;
                   },
-                  decoration: AppStyle.inputDecoration(
+                  decoration: _inputDecoration(
                     label: _discountType == 'percent'
                         ? 'Discount %'
                         : 'Discount Amount',
@@ -1202,9 +1262,11 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
           Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: AppStyle.backgroundColor,
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: ColorName.greyBorder),
+              border: Border.all(
+                color: isDark ? context.customColors.border : ColorName.greyBorder,
+              ),
             ),
             child: Column(
               children: [
@@ -1222,7 +1284,7 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                             ? '${discount.toStringAsFixed(0)}%'
                             : '₹${discount.toStringAsFixed(0)}'
                       : '₹0',
-                  valueColor: ColorName.successLight,
+                  valueColor: context.customColors.success,
                 ),
 
                 const Padding(
@@ -1237,14 +1299,14 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                       height: 38,
                       width: 38,
                       decoration: BoxDecoration(
-                        color: ColorName.primarybackground.withValues(
+                        color: primaryColor.withValues(
                           alpha: 0.08,
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.sell_outlined,
-                        color: ColorName.primarybackground,
+                        color: primaryColor,
                         size: 20,
                       ),
                     ),
@@ -1263,17 +1325,17 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
                           Text(
                             'Price customer will pay',
                             style: AppStyle.bodySmall.copyWith(
-                              color: AppStyle.textSecondary,
+                              color: context.customColors.secondaryText,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       '₹${finalPrice.toStringAsFixed(0)}',
                       style: TextStyle(
-                        color: ColorName.primarybackground,
+                        color: primaryColor,
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                       ),
@@ -1294,25 +1356,25 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: ColorName.successLight.withValues(alpha: 0.08),
+                color: context.customColors.success.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: ColorName.successLight.withValues(alpha: 0.20),
+                  color: context.customColors.success.withValues(alpha: 0.20),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.savings_outlined,
                     size: 18,
-                    color: ColorName.successLight,
+                    color: context.customColors.success,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Customer saves ₹${(mrp - finalPrice).toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: ColorName.successLight,
+                      style: TextStyle(
+                        color: context.customColors.success,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -1332,19 +1394,20 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
     required String value,
     Color? valueColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
           child: Text(
             label,
-            style: AppStyle.bodySmall.copyWith(color: AppStyle.textSecondary),
+            style: AppStyle.bodySmall.copyWith(color: context.customColors.secondaryText),
           ),
         ),
         Text(
           value,
           style: AppStyle.bodyMedium.copyWith(
             fontWeight: FontWeight.w600,
-            color: valueColor ?? AppStyle.textPrimary,
+            color: valueColor ?? (isDark ? Colors.white : AppStyle.textPrimary),
           ),
         ),
       ],
@@ -1356,23 +1419,26 @@ class _AddInventoryScreenState extends ConsumerState<AddInventoryScreen> {
   // ============================================================
 
   Widget _buildError(String message) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: AppStyle.spaceLarge),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: ColorName.toastErrorBg,
-        border: Border.all(color: ColorName.toastErrorBorder),
+        color: isDark ? context.customColors.danger.withValues(alpha: 0.1) : ColorName.toastErrorBg,
+        border: Border.all(
+          color: isDark ? context.customColors.danger.withValues(alpha: 0.4) : ColorName.toastErrorBorder,
+        ),
         borderRadius: AppStyle.borderRadiusMedium,
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: ColorName.toastErrorIcon),
+          Icon(Icons.error_outline, color: isDark ? context.customColors.danger : ColorName.toastErrorIcon),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(color: ColorName.toastErrorText),
+              style: TextStyle(color: isDark ? Colors.redAccent.shade100 : ColorName.toastErrorText),
             ),
           ),
         ],
@@ -1541,6 +1607,7 @@ class _ProductImageCarouselState extends State<_ProductImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         // ==========================================================
@@ -1561,7 +1628,7 @@ class _ProductImageCarouselState extends State<_ProductImageCarousel> {
                 final image = widget.images[index];
 
                 return Container(
-                  color: AppStyle.backgroundColor,
+                  color: isDark ? Colors.white.withValues(alpha: 0.05) : AppStyle.backgroundColor,
                   child: Image.network(
                     image.url,
                     width: double.infinity,
@@ -1612,7 +1679,7 @@ class _ProductImageCarouselState extends State<_ProductImageCarousel> {
                 width: isSelected ? 14 : 5,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? ColorName.primarybackground
+                      ? (isDark ? ColorName.secondary : ColorName.primarybackground)
                       : ColorName.greyLight1,
                   borderRadius: BorderRadius.circular(10),
                 ),
