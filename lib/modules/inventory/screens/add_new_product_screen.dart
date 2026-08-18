@@ -622,18 +622,28 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                _showImageSourcePicker(provider);
-              },
+              onPressed: state.selectedImages.length >= 5
+                  ? null
+                  : () {
+                      _showImageSourcePicker(provider);
+                    },
               icon: const Icon(Icons.add_photo_alternate_outlined),
               label: Text(
-                state.selectedImages.isEmpty
-                    ? 'Add Product Images'
-                    : 'Add More Images',
+                state.selectedImages.length >= 5
+                    ? 'Maximum 5 Images Uploaded'
+                    : (state.selectedImages.isEmpty
+                        ? 'Add Product Images'
+                        : 'Add More Images (${state.selectedImages.length}/5)'),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: primaryColor,
-                side: BorderSide(color: primaryColor),
+                foregroundColor: state.selectedImages.length >= 5
+                    ? Colors.grey
+                    : primaryColor,
+                side: BorderSide(
+                  color: state.selectedImages.length >= 5
+                      ? Colors.grey.withValues(alpha: 0.5)
+                      : primaryColor,
+                ),
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -902,7 +912,7 @@ class _AddNewProductScreenState extends ConsumerState<AddNewProductScreen> {
     final skuController = TextEditingController();
     final volumeController = TextEditingController();
 
-    bool isDefault = provider.state.variants.isEmpty;
+    bool isDefault = ref.read(addNewProductProvider).variants.isEmpty;
 
     String status = 'ACTIVE';
 

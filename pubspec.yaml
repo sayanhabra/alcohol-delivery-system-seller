@@ -49,6 +49,8 @@ dependencies:
   firebase_remote_config:
   flutter_svg: ^2.3.0
   image_picker: ^1.2.3
+  flutter_image_compress: ^2.3.0
+  path_provider: ^2.1.2
   intl: ^0.20.3
   lottie: ^3.5.1
   custom_dropdown_pro: ^0.0.7

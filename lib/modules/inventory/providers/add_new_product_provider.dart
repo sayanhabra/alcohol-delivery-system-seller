@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:adm_seller/core/api/api_service.dart';
 import 'package:adm_seller/modules/inventory/models/category_brand_data.dart';
 import 'package:adm_seller/modules/inventory/models/product_details_response.dart';
 import 'package:adm_seller/modules/inventory/models/product_request_models.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 final addNewProductProvider =
     StateNotifierProvider<AddNewProductNotifier, AddNewProductState>((ref) {
@@ -274,7 +277,61 @@ class AddNewProductNotifier extends StateNotifier<AddNewProductState> {
   //===============================
   //IMAGE
   //===============================
+  Future<XFile> _compressIfNeeded(XFile image) async {
+    try {
+      final file = File(image.path);
+      final size = await file.length();
+      final limit = 1.5 * 1024 * 1024; // 1.5 MB in bytes
+
+      if (size <= limit) {
+        return image;
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final targetPath = '${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}_${image.name}';
+
+      var quality = 80;
+      var compressedFile = await FlutterImageCompress.compressAndGetFile(
+        image.path,
+        targetPath,
+        quality: quality,
+        minWidth: 1920,
+        minHeight: 1920,
+      );
+
+      if (compressedFile != null) {
+        var compressedSize = await File(compressedFile.path).length();
+        while (compressedSize > limit && quality > 20) {
+          quality -= 20;
+          final newTargetPath = '${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}_q${quality}_${image.name}';
+          final nextCompressedFile = await FlutterImageCompress.compressAndGetFile(
+            image.path,
+            newTargetPath,
+            quality: quality,
+            minWidth: 1280,
+            minHeight: 1280,
+          );
+          if (nextCompressedFile == null) break;
+          compressedFile = nextCompressedFile;
+          compressedSize = await File(compressedFile.path).length();
+        }
+      }
+
+      if (compressedFile != null) {
+        return XFile(compressedFile.path);
+      }
+    } catch (e) {
+      // If compression fails, fall back to original image
+    }
+    return image;
+  }
+
   Future<void> pickImages() async {
+    if (state.selectedImages.length >= 5) {
+      state = state.copyWith(errorMessage: 'Maximum of 5 images allowed.');
+      return;
+    }
+
     try {
       final images = await _imagePicker.pickMultiImage(imageQuality: 85);
 
@@ -282,15 +339,38 @@ class AddNewProductNotifier extends StateNotifier<AddNewProductState> {
         return;
       }
 
-      final updatedImages = [...state.selectedImages, ...images];
+      var allowedImages = images;
+      bool wasTruncated = false;
+      if (state.selectedImages.length + images.length > 5) {
+        final remainingAllowed = 5 - state.selectedImages.length;
+        allowedImages = images.take(remainingAllowed).toList();
+        wasTruncated = true;
+      }
 
-      state = state.copyWith(selectedImages: updatedImages);
+      final compressedImages = <XFile>[];
+      for (final img in allowedImages) {
+        final compressed = await _compressIfNeeded(img);
+        compressedImages.add(compressed);
+      }
+
+      final updatedImages = [...state.selectedImages, ...compressedImages];
+
+      state = state.copyWith(
+        selectedImages: updatedImages,
+        errorMessage: wasTruncated ? 'Only up to 5 images can be uploaded. Extra images were ignored.' : null,
+        clearError: !wasTruncated,
+      );
     } catch (e) {
       state = state.copyWith(errorMessage: 'Unable to select images: $e');
     }
   }
 
   Future<void> takePhoto() async {
+    if (state.selectedImages.length >= 5) {
+      state = state.copyWith(errorMessage: 'Maximum of 5 images allowed.');
+      return;
+    }
+
     try {
       final image = await _imagePicker.pickImage(
         source: ImageSource.camera,
@@ -301,9 +381,14 @@ class AddNewProductNotifier extends StateNotifier<AddNewProductState> {
         return;
       }
 
-      final updatedImages = [...state.selectedImages, image];
+      final compressed = await _compressIfNeeded(image);
 
-      state = state.copyWith(selectedImages: updatedImages);
+      final updatedImages = [...state.selectedImages, compressed];
+
+      state = state.copyWith(
+        selectedImages: updatedImages,
+        clearError: true,
+      );
     } catch (e) {
       state = state.copyWith(errorMessage: 'Unable to take photo: $e');
     }
@@ -318,7 +403,10 @@ class AddNewProductNotifier extends StateNotifier<AddNewProductState> {
 
     images.removeAt(index);
 
-    state = state.copyWith(selectedImages: images);
+    state = state.copyWith(
+      selectedImages: images,
+      clearError: true,
+    );
   }
 
   void setProductStatus(String? status) {
