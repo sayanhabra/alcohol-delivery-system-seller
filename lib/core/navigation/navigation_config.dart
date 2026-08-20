@@ -2,7 +2,7 @@ import 'package:adm_seller/core/config/app_icons.dart';
 import 'package:adm_seller/core/config/app_router.dart';
 import 'package:adm_seller/core/shared/const/role_enum.dart';
 import 'package:adm_seller/modules/auth/providers/auth_provider.dart';
-import 'package:adm_seller/modules/inventory/screens/add_inventory_screen.dart';
+// import 'package:adm_seller/modules/inventory/screens/add_inventory_screen.dart';
 import 'package:adm_seller/modules/inventory/screens/inventory_screen.dart';
 import 'package:adm_seller/modules/order/screens/dashboard_screen.dart';
 import 'package:adm_seller/modules/order/screens/profile_screen.dart';

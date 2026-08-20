@@ -19,9 +19,19 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
   return state is AuthAuthenticated;
 });
 
+// final currentUserProvider = Provider<UserModel?>((ref) {
+//   final auth = ref.watch(authNotifierProvider);
+//   return (auth.asData?.value as AuthAuthenticated?)?.user;
+// });
 final currentUserProvider = Provider<UserModel?>((ref) {
   final auth = ref.watch(authNotifierProvider);
-  return (auth.asData?.value as AuthAuthenticated?)?.user;
+  final state = auth.asData?.value;
+
+  if (state is AuthAuthenticated) {
+    return state.user;
+  }
+
+  return null;
 });
 
 // ==================== TOKEN STORAGE ====================

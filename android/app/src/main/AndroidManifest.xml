@@ -15,7 +15,7 @@
         android:required="true" />
 
     <application
-        android:label="adm_seller"
+        android:label="Fluup Seller"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
