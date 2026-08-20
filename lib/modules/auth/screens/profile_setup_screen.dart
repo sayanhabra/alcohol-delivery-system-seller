@@ -42,25 +42,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _ifscCode = TextEditingController();
   final _upiId = TextEditingController();
 
+  final _formKey = GlobalKey<FormState>();
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+
   bool _isLoading = false;
   String? _errorText;
-
-  // ─── Validation ───
-  bool get _isFormValid {
-    return _storeName.text.trim().length >= 2 &&
-        _licenseNumber.text.trim().isNotEmpty &&
-        _licenseHolderName.text.trim().isNotEmpty &&
-        _licenseType.text.trim().isNotEmpty &&
-        _licenseExpiryDate.text.trim().isNotEmpty &&
-        _gstin.text.trim().length == 15 &&
-        _panNumber.text.trim().length == 10 &&
-        _addressLine1.text.trim().isNotEmpty &&
-        _city.text.trim().isNotEmpty &&
-        _state.text.trim().isNotEmpty &&
-        _pincode.text.trim().length == 6 &&
-        double.tryParse(_latitude.text.trim()) != null &&
-        double.tryParse(_longitude.text.trim()) != null;
-  }
 
   @override
   void dispose() {
@@ -151,7 +137,26 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   // ─── Submit ───
 
   Future<void> _submitProfile() async {
-    if (!_isFormValid) return;
+    setState(() {
+      _autovalidateMode = AutovalidateMode.onUserInteraction;
+    });
+
+    final isFormValid = _formKey.currentState?.validate() ?? false;
+    final hasCoordinates =
+        double.tryParse(_latitude.text.trim()) != null &&
+        double.tryParse(_longitude.text.trim()) != null;
+
+    if (!isFormValid || !hasCoordinates) {
+      setState(() {
+        if (!hasCoordinates) {
+          _errorText = 'Please pick a store location on the map';
+        } else {
+          _errorText = 'Please correct the errors in the form';
+        }
+      });
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     setState(() {
       _isLoading = true;
@@ -191,31 +196,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       final profile = response.response;
       final newStatus = profile.status;
 
-      // Map seller status to verification status for router navigation
-      // final SellerStatus newStatus;
-      // if (profile.status.isActive) {
-      //   newStatus = SellerStatus.verified;
-      // } else if (profile.status.isManualReviewRequired) {
-      //   newStatus = SellerStatus.underReview;
-      // } else {
-      //   newStatus = SellerStatus.pendingVerification;
-      // }
-
-      // Update auth state via notifier method
       await ref
           .read(authNotifierProvider.notifier)
           .updateUserVerificationStatus(newStatus);
-
-      // Update auth state directly to trigger router redirect
-      // final currentAuth = ref.read(authNotifierProvider).asData?.value;
-      // if (currentAuth is AuthAuthenticated) {
-      //   state = AsyncValue.data(
-      //     AuthAuthenticated(
-      //       accessToken: currentAuth.accessToken,
-      //       user: currentAuth.user.copyWith(verificationStatus: newStatus),
-      //     ),
-      //   );
-      // }
     } catch (e) {
       if (!mounted) return;
 
@@ -241,306 +224,395 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final isDark = context.isDarkMode;
 
     return AuthStatusScaffold(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ═══════════════════════════════════════════════════════
-          // HEADER
-          // ═══════════════════════════════════════════════════════
-          Center(
-            child: Column(
+      child: Form(
+        key: _formKey,
+        autovalidateMode: _autovalidateMode,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ═══════════════════════════════════════════════════════
+            // HEADER
+            // ═══════════════════════════════════════════════════════
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    'Setup Your Store',
+                    textAlign: TextAlign.center,
+                    style: AppStyle.heading3.copyWith(
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: AppStyle.spaceSmall),
+                  Text(
+                    'Complete your profile to start selling',
+                    textAlign: TextAlign.center,
+                    style: AppStyle.bodyMedium.copyWith(
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppStyle.spaceXXLarge),
+
+            // ═══════════════════════════════════════════════════════
+            // STORE INFO
+            // ═══════════════════════════════════════════════════════
+            _sectionTitle('Store Information'),
+            const SizedBox(height: AppStyle.spaceMedium),
+            _buildField(
+              controller: _storeName,
+              label: 'Store Name *',
+              hint: 'Royal Liquor Palace',
+              onChanged: (_) => _clearError(),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'^[a-zA-Z\s\.]+$'), // Letters, spaces, and dots
+                ),
+              ],
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Store name is required';
+                }
+                if (val.trim().length < 2) {
+                  return 'Store name must be at least 2 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _storeDescription,
+              label: 'Store Description',
+              hint: 'Premium wines and spirits shop',
+              onChanged: (_) => _clearError(),
+            ),
+            const SizedBox(height: AppStyle.spaceXLarge),
+
+            // ═══════════════════════════════════════════════════════
+            // LICENSE DETAILS
+            // ═══════════════════════════════════════════════════════
+            _sectionTitle('License Details'),
+            const SizedBox(height: AppStyle.spaceMedium),
+            _buildField(
+              controller: _licenseNumber,
+              label: 'License Number *',
+              hint: 'EXCISE/KA/2026/99812',
+              onChanged: (_) => _clearError(),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'License number is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _licenseHolderName,
+              keyboardType: TextInputType.name,
+              label: 'License Holder Name *',
+              hint: 'Royal Liquors Pvt Ltd',
+              onChanged: (_) => _clearError(),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'^[a-zA-Z\s\.]+$'), // Letters, spaces, and dots
+                ),
+              ],
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'License holder name is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _licenseType,
+              label: 'License Type *',
+              hint: 'FL-1',
+              onChanged: (_) => _clearError(),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'License type is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            Row(
               children: [
-                Text(
-                  'Setup Your Store',
-                  textAlign: TextAlign.center,
-                  style: AppStyle.heading3.copyWith(
-                    color: isDark ? Colors.white : Colors.black87,
+                Expanded(
+                  child: _buildDateField(
+                    controller: _licenseIssueDate,
+                    label: 'Issue Date',
+                    hint: '2024-01-01',
                   ),
                 ),
-                const SizedBox(height: AppStyle.spaceSmall),
-                Text(
-                  'Complete your profile to start selling',
-                  textAlign: TextAlign.center,
-                  style: AppStyle.bodyMedium.copyWith(
-                    color: isDark ? Colors.white70 : Colors.black54,
+                const SizedBox(width: AppStyle.spaceMedium),
+                Expanded(
+                  child: _buildDateField(
+                    controller: _licenseExpiryDate,
+                    label: 'Expiry Date *',
+                    hint: '2027-12-31',
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Expiry date is required';
+                      }
+                      return null;
+                    },
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AppStyle.spaceXXLarge),
+            const SizedBox(height: AppStyle.spaceXLarge),
 
-          // ═══════════════════════════════════════════════════════
-          // STORE INFO
-          // ═══════════════════════════════════════════════════════
-          _sectionTitle('Store Information'),
-          const SizedBox(height: AppStyle.spaceMedium),
-          _buildField(
-            controller: _storeName,
-            label: 'Store Name *',
-            hint: 'Royal Liquor Palace',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _storeDescription,
-            label: 'Store Description',
-            hint: 'Premium wines and spirits shop',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceXLarge),
-
-          // ═══════════════════════════════════════════════════════
-          // LICENSE DETAILS
-          // ═══════════════════════════════════════════════════════
-          _sectionTitle('License Details'),
-          const SizedBox(height: AppStyle.spaceMedium),
-          _buildField(
-            controller: _licenseNumber,
-            label: 'License Number *',
-            hint: 'EXCISE/KA/2026/99812',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _licenseHolderName,
-            label: 'License Holder Name *',
-            hint: 'Royal Liquors Pvt Ltd',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _licenseType,
-            label: 'License Type *',
-            hint: 'FL-1',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDateField(
-                  controller: _licenseIssueDate,
-                  label: 'Issue Date',
-                  hint: '2024-01-01',
-                ),
-              ),
-              const SizedBox(width: AppStyle.spaceMedium),
-              Expanded(
-                child: _buildDateField(
-                  controller: _licenseExpiryDate,
-                  label: 'Expiry Date *',
-                  hint: '2027-12-31',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppStyle.spaceXLarge),
-
-          // ═══════════════════════════════════════════════════════
-          // TAX DETAILS
-          // ═══════════════════════════════════════════════════════
-          _sectionTitle('Tax Details'),
-          const SizedBox(height: AppStyle.spaceMedium),
-          _buildField(
-            controller: _gstin,
-            label: 'GSTIN *',
-            hint: '29ABCDE1234F1Z5',
-            maxLength: 15,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _panNumber,
-            label: 'PAN Number *',
-            hint: 'ABCDE1234F',
-            maxLength: 10,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceXLarge),
-
-          // ═══════════════════════════════════════════════════════
-          // ADDRESS
-          // ═══════════════════════════════════════════════════════
-          _sectionTitle('Address'),
-          const SizedBox(height: AppStyle.spaceMedium),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: OutlinedButton.icon(
-              onPressed: _openLocationPicker,
-              icon: const Icon(Icons.location_on_outlined),
-              label: const Text('Pick Location on Map'),
+            // ═══════════════════════════════════════════════════════
+            // TAX DETAILS
+            // ═══════════════════════════════════════════════════════
+            _sectionTitle('Tax Details'),
+            const SizedBox(height: AppStyle.spaceMedium),
+            _buildField(
+              controller: _gstin,
+              label: 'GSTIN *',
+              hint: '29ABCDE1234F1Z5',
+              maxLength: 15,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => _clearError(),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'GSTIN is required';
+                }
+                if (val.trim().length != 15) {
+                  return 'GSTIN must be exactly 15 characters';
+                }
+                return null;
+              },
             ),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _addressLine1,
-            label: 'Address Line 1 *',
-            hint: 'Shop No. 12, Main MG Road',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _addressLine2,
-            label: 'Address Line 2',
-            hint: 'Near Trinity Metro Station',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          Row(
-            children: [
-              Expanded(
-                child: _buildField(
-                  controller: _city,
-                  label: 'City *',
-                  hint: 'Bengaluru',
-                  onChanged: (_) => _clearError(),
-                ),
-              ),
-              const SizedBox(width: AppStyle.spaceMedium),
-              Expanded(
-                child: _buildField(
-                  controller: _state,
-                  label: 'State *',
-                  hint: 'Karnataka',
-                  onChanged: (_) => _clearError(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _pincode,
-            label: 'Pincode *',
-            hint: '560001',
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(6),
-            ],
-            onChanged: (_) => _clearError(),
-          ),
-          // const SizedBox(height: AppStyle.spaceLarge),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _panNumber,
+              label: 'PAN Number *',
+              hint: 'ABCDE1234F',
+              maxLength: 10,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => _clearError(),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'PAN number is required';
+                }
+                if (val.trim().length != 10) {
+                  return 'PAN number must be exactly 10 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppStyle.spaceXLarge),
 
-          // Row(
-          //   children: [
-          //     Expanded(
-          //       child: _buildField(
-          //         controller: _latitude,
-          //         label: 'Latitude *',
-          //         hint: '12.9715987',
-          //         keyboardType: const TextInputType.numberWithOptions(
-          //           decimal: true,
-          //         ),
-          //         onChanged: (_) => _clearError(),
-          //       ),
-          //     ),
-          //     const SizedBox(width: AppStyle.spaceMedium),
-          //     Expanded(
-          //       child: _buildField(
-          //         controller: _longitude,
-          //         label: 'Longitude *',
-          //         hint: '77.5945627',
-          //         keyboardType: const TextInputType.numberWithOptions(
-          //           decimal: true,
-          //         ),
-          //         onChanged: (_) => _clearError(),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          //           Row(
-          //   children: [
-          //     Expanded(
-          //       child: BuildTextField(
-          //         label: 'Latitude',
-          //         controller: _latitude,
-          //         keyboardType:
-          //             const TextInputType.numberWithOptions(
-          //           decimal: true,
-          //           signed: true,
-          //         ),
-          //       ),
-          //     ),
-          //     const SizedBox(width: 12),
-          //     Expanded(
-          //       child: BuildTextField(
-          //         label: 'Longitude',
-          //         controller: _longitude,
-          //         keyboardType:
-          //             const TextInputType.numberWithOptions(
-          //           decimal: true,
-          //           signed: true,
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          const SizedBox(height: AppStyle.spaceXLarge),
-
-          // ═══════════════════════════════════════════════════════
-          // BANK DETAILS (Optional)
-          // ═══════════════════════════════════════════════════════
-          _sectionTitle('Bank Details (Optional)'),
-          const SizedBox(height: AppStyle.spaceMedium),
-          _buildField(
-            controller: _bankAccountNumber,
-            label: 'Account Number',
-            hint: '987654321012',
-            keyboardType: TextInputType.number,
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _ifscCode,
-            label: 'IFSC Code',
-            hint: 'SBIN0001234',
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceLarge),
-          _buildField(
-            controller: _upiId,
-            label: 'UPI ID',
-            hint: 'royalliquor@upi',
-            onChanged: (_) => _clearError(),
-          ),
-          const SizedBox(height: AppStyle.spaceXXLarge),
-
-          // ═══════════════════════════════════════════════════════
-          // ERROR
-          // ═══════════════════════════════════════════════════════
-          if (_errorText != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppStyle.spaceMedium),
-              child: Text(
-                _errorText!,
-                textAlign: TextAlign.center,
-                style: AppStyle.bodySmall.copyWith(
-                  color: isDark ? Colors.redAccent : Colors.red.shade700,
-                ),
+            // ═══════════════════════════════════════════════════════
+            // ADDRESS
+            // ═══════════════════════════════════════════════════════
+            _sectionTitle('Address'),
+            const SizedBox(height: AppStyle.spaceMedium),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                onPressed: _openLocationPicker,
+                icon: const Icon(Icons.location_on_outlined),
+                label: const Text('Pick Location on Map'),
               ),
             ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _addressLine1,
+              label: 'Address Line 1 *',
+              hint: 'Shop No. 12, Main MG Road',
+              onChanged: (_) => _clearError(),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Address Line 1 is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _addressLine2,
+              label: 'Address Line 2',
+              hint: 'Near Trinity Metro Station',
+              onChanged: (_) => _clearError(),
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildField(
+                    controller: _city,
+                    label: 'City *',
+                    hint: 'Bengaluru',
+                    onChanged: (_) => _clearError(),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'City is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: AppStyle.spaceMedium),
+                Expanded(
+                  child: _buildField(
+                    controller: _state,
+                    label: 'State *',
+                    hint: 'Karnataka',
+                    onChanged: (_) => _clearError(),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'State is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _pincode,
+              label: 'Pincode *',
+              hint: '560001',
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(6),
+              ],
+              onChanged: (_) => _clearError(),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Pincode is required';
+                }
+                if (val.trim().length != 6) {
+                  return 'Pincode must be exactly 6 digits';
+                }
+                return null;
+              },
+            ),
+            // const SizedBox(height: AppStyle.spaceLarge),
 
-          // ═══════════════════════════════════════════════════════
-          // SUBMIT
-          // ═══════════════════════════════════════════════════════
-          SecondaryButton(
-            text: 'Save & Continue',
-            horizontalMargin: 0,
-            height: 56,
-            state: _isLoading
-                ? ButtonState.loading
-                : _isFormValid
-                ? ButtonState.enabled
-                : ButtonState.disabled,
-            onPressed: _submitProfile,
-          ),
-          const SizedBox(height: AppStyle.spaceXLarge),
-        ],
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: _buildField(
+            //         controller: _latitude,
+            //         label: 'Latitude *',
+            //         hint: '12.9715987',
+            //         keyboardType: const TextInputType.numberWithOptions(
+            //           decimal: true,
+            //         ),
+            //         onChanged: (_) => _clearError(),
+            //       ),
+            //     ),
+            //     const SizedBox(width: AppStyle.spaceMedium),
+            //     Expanded(
+            //       child: _buildField(
+            //         controller: _longitude,
+            //         label: 'Longitude *',
+            //         hint: '77.5945627',
+            //         keyboardType: const TextInputType.numberWithOptions(
+            //           decimal: true,
+            //         ),
+            //         onChanged: (_) => _clearError(),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            //           Row(
+            //   children: [
+            //     Expanded(
+            //       child: BuildTextField(
+            //         label: 'Latitude',
+            //         controller: _latitude,
+            //         keyboardType:
+            //             const TextInputType.numberWithOptions(
+            //           decimal: true,
+            //           signed: true,
+            //         ),
+            //       ),
+            //     ),
+            //     const SizedBox(width: 12),
+            //     Expanded(
+            //       child: BuildTextField(
+            //         label: 'Longitude',
+            //         controller: _longitude,
+            //         keyboardType:
+            //             const TextInputType.numberWithOptions(
+            //           decimal: true,
+            //           signed: true,
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            const SizedBox(height: AppStyle.spaceXLarge),
+
+            // ═══════════════════════════════════════════════════════
+            // BANK DETAILS (Optional)
+            // ═══════════════════════════════════════════════════════
+            _sectionTitle('Bank Details (Optional)'),
+            const SizedBox(height: AppStyle.spaceMedium),
+            _buildField(
+              controller: _bankAccountNumber,
+              label: 'Account Number',
+              hint: '987654321012',
+              keyboardType: TextInputType.number,
+              onChanged: (_) => _clearError(),
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _ifscCode,
+              label: 'IFSC Code',
+              hint: 'SBIN0001234',
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => _clearError(),
+            ),
+            const SizedBox(height: AppStyle.spaceLarge),
+            _buildField(
+              controller: _upiId,
+              label: 'UPI ID',
+              hint: 'royalliquor@upi',
+              onChanged: (_) => _clearError(),
+            ),
+            const SizedBox(height: AppStyle.spaceXXLarge),
+
+            // ═══════════════════════════════════════════════════════
+            // ERROR
+            // ═══════════════════════════════════════════════════════
+            if (_errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppStyle.spaceMedium),
+                child: Text(
+                  _errorText!,
+                  textAlign: TextAlign.center,
+                  style: AppStyle.bodySmall.copyWith(
+                    color: isDark ? Colors.redAccent : Colors.red.shade700,
+                  ),
+                ),
+              ),
+
+            // ═══════════════════════════════════════════════════════
+            // SUBMIT
+            // ═══════════════════════════════════════════════════════
+            SecondaryButton(
+              text: 'Save & Continue',
+              horizontalMargin: 0,
+              height: 56,
+              state: _isLoading ? ButtonState.loading : ButtonState.enabled,
+              onPressed: _submitProfile,
+            ),
+            const SizedBox(height: AppStyle.spaceXLarge),
+          ],
+        ),
       ),
     );
   }
@@ -568,6 +640,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     TextCapitalization textCapitalization = TextCapitalization.none,
     int? maxLength,
     void Function(String)? onChanged,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,13 +652,14 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           ),
         ),
         const SizedBox(height: AppStyle.spaceSmall),
-        TextField(
+        TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization,
           maxLength: maxLength,
           onChanged: onChanged,
+          validator: validator,
           style: TextStyle(
             color: context.isDarkMode ? Colors.white : Colors.black87,
           ),
@@ -599,6 +673,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     required TextEditingController controller,
     required String label,
     required String hint,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,10 +685,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           ),
         ),
         const SizedBox(height: AppStyle.spaceSmall),
-        TextField(
+        TextFormField(
           controller: controller,
           readOnly: true,
           onTap: () => _pickDate(controller),
+          validator: validator,
           style: TextStyle(
             color: context.isDarkMode ? Colors.white : Colors.black87,
           ),
@@ -651,6 +727,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           color: isDark ? ColorName.secondary : ColorName.primaryBrandRed,
           width: 2,
         ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: AppStyle.borderRadiusMedium,
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: AppStyle.borderRadiusMedium,
+        borderSide: const BorderSide(color: Colors.red, width: 2.0),
+      ),
+      errorStyle: TextStyle(
+        color: isDark ? Colors.redAccent : Colors.red.shade700,
+        fontSize: 12,
       ),
       counterText: '',
     );
